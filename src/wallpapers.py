@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Original Ghost of Tsushima wallpapers, painted from code.
 
-usage: wallpapers.py [--scene NAME ...] [--res WxH] [--out DIR] [--list]
+usage: wallpapers.py [--scene NAME ...] [--res WxH] [--out DIR] [--bw] [--list]
+
+--bw renders the black-and-white Kurosawa-mode grade of each scene.
 
 Every scene is composed in a 3840x2160 design space and rendered at any
 resolution (other aspect ratios are rendered 16:9 and centre-cropped).
@@ -594,7 +596,18 @@ SCENES = {
 }
 
 
-def render(key, w, h, seed=None):
+# per-scene grade tweaks for the black-and-white versions
+BW = {
+    "Higanbana": {"mix": (0.62, 0.30, 0.08), "contrast": 6.5},         # lilies glow, the moon blooms
+    "ToriiAtDawn": {"mix": (0.40, 0.45, 0.15), "contrast": 5.0, "clarity": 0.35, "lift": 0.04},
+    "Standoff": {"mix": (0.45, 0.42, 0.13), "contrast": 7.0},
+    "Kurosawa": {"mix": (0.30, 0.55, 0.15), "contrast": 6.0},          # leaves go dark, like ink
+    "GuidingWind": {"contrast": 5.5, "halation": 0.1},
+    "GuidingWindPaper": {"contrast": 4.5, "lift": 0.05, "halation": 0.05},
+}
+
+
+def render(key, w, h, seed=None, bw=False):
     name, fn, grain, vig = SCENES[key]
     rw, rh = w, h
     if abs(w / h - 16 / 9) > 0.01:            # render 16:9 that covers, then crop
@@ -604,7 +617,11 @@ def render(key, w, h, seed=None):
             rw = round(h * 16 / 9)
     c = Canvas(rw, rh, "#000000")
     fn(c, random.Random(seed if seed is not None else hash(key) % 10000))
-    im = c.finish(grain=grain, vignette=vig, seed=7)
+    if bw:
+        c.bw_grade(**BW.get(key, {}))
+        im = c.finish(grain=max(grain, 0.03) * 1.5, vignette=min(0.8, vig * 1.25 + 0.05), seed=7, mono=True)
+    else:
+        im = c.finish(grain=grain, vignette=vig, seed=7)
     if (rw, rh) != (w, h):
         l, t = (rw - w) // 2, (rh - h) // 2
         im = im.crop((l, t, l + w, t + h))
@@ -617,6 +634,7 @@ def main():
     ap.add_argument("--res", default="3840x2160")
     ap.add_argument("--out", default="wallpapers")
     ap.add_argument("--quality", type=int, default=92)
+    ap.add_argument("--bw", action="store_true", help="black-and-white Kurosawa-mode grade")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
     if a.list:
@@ -628,8 +646,8 @@ def main():
     for key in a.scene or SCENES:
         if key not in SCENES:
             sys.exit(f"unknown scene {key}; try --list")
-        im = render(key, w, h, seed=sum(map(ord, key)))
-        path = os.path.join(a.out, f"GhostOfTsushima-{key}-{w}x{h}.jpg")
+        im = render(key, w, h, seed=sum(map(ord, key)), bw=a.bw)
+        path = os.path.join(a.out, f"GhostOfTsushima-{key}{'-BW' if a.bw else ''}-{w}x{h}.jpg")
         im.save(path, quality=a.quality, optimize=True, progressive=True, subsampling=0)
         print(path)
 
