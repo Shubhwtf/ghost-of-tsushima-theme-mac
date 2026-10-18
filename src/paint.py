@@ -159,7 +159,7 @@ class Canvas:
     def svg_mask(self, body, defs=""):
         """Rasterise SVG shapes (paint them white) into a 0..1 float mask."""
         doc = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" '
-               f'viewBox="0 0 {DW} {DH}"><defs>{defs}</defs>{body}</svg>')
+               f'viewBox="0 0 {DW} {DH}"><defs>{defs}</defs><g fill="#fff">{body}</g></svg>')
         png = subprocess.run(["rsvg-convert", "-w", str(self.w), "-h", str(self.h)],
                              input=doc.encode(), capture_output=True, check=True).stdout
         import io
