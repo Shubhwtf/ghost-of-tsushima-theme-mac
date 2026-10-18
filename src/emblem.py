@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from palette import C  # noqa: E402
+from palette import C, ROLE, SUFFIX  # noqa: E402
 
 
 def _f(p):
@@ -53,8 +53,10 @@ def enso_paths(cx, cy, r, width, seed=7, start=-2.25, sweep=5.75, bristles=26):
     return out
 
 
-def katana_svg(x0, y0, x1, y1, scale, blade="#ece6dc", edge="#0b0a0a", gold="#c9a45c", hilt="#141212"):
+def katana_svg(x0, y0, x1, y1, scale, blade=None, edge=None, gold=None, hilt=None):
     """Katana from hilt end (x0,y0) to the tip (x1,y1)."""
+    blade, edge = blade or ROLE["blade"], edge or C["ink"]
+    gold, hilt = gold or ROLE["metal"], hilt or C["charcoal"]
     L = math.hypot(x1 - x0, y1 - y0)
     ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
     s = scale
@@ -69,7 +71,7 @@ def katana_svg(x0, y0, x1, y1, scale, blade="#ece6dc", edge="#0b0a0a", gold="#c9
              f'fill="{blade}" stroke="{edge}" stroke-width="{s * 0.28:.2f}" stroke-linejoin="round"/>')
     # hamon line
     g.append(f'<path d="M{hl + s * 2},{s * 0.12:.1f} C{hl + bl * 0.4:.1f},{-s * 0.05 - bl * 0.012:.1f} {hl + bl * 0.75:.1f},{-s * 0.1 - bl * 0.03:.1f} '
-             f'{L - s * 2.2:.1f},{-s * 0.25 - bl * 0.05:.1f}" fill="none" stroke="#b9b1a6" stroke-width="{s * 0.16:.2f}"/>')
+             f'{L - s * 2.2:.1f},{-s * 0.25 - bl * 0.05:.1f}" fill="none" stroke="{C['mist']}" stroke-width="{s * 0.16:.2f}"/>')
     # habaki, tsuba, tsuka with gold diamond wrap, kashira
     g.append(f'<rect x="{hl - s * 0.2:.1f}" y="{-s * 0.75:.1f}" width="{s * 1.2:.1f}" height="{s * 1.5:.1f}" fill="{gold}" stroke="{edge}" stroke-width="{s * 0.2:.2f}"/>')
     g.append(f'<ellipse cx="{hl - s * 0.45:.1f}" cy="0" rx="{s * 0.55:.1f}" ry="{s * 2.3:.1f}" fill="{gold}" stroke="{edge}" stroke-width="{s * 0.25:.2f}"/>')
@@ -86,7 +88,7 @@ def katana_svg(x0, y0, x1, y1, scale, blade="#ece6dc", edge="#0b0a0a", gold="#c9
 
 
 def emblem_svg(size=1024, bg=None, red=None, small=False):
-    red = red or C["lacquer"]
+    red = red or ROLE["emblem"]
     cx = cy = size / 2
     r = size * 0.34
     paths = enso_paths(cx, cy, r, size * (0.16 if small else 0.12), bristles=14 if small else 26)
@@ -102,15 +104,15 @@ def emblem_svg(size=1024, bg=None, red=None, small=False):
 
 def main(out):
     os.makedirs(out, exist_ok=True)
-    svg = os.path.join(out, "emblem.svg")
+    svg = os.path.join(out, f"emblem{SUFFIX}.svg")
     with open(svg, "w") as f:
         f.write(emblem_svg(1024))
-    subprocess.run(["rsvg-convert", "-w", "1024", "-h", "1024", svg, "-o", os.path.join(out, "emblem.png")], check=True)
-    subprocess.run(["rsvg-convert", "-w", "256", "-h", "256", svg, "-o", os.path.join(out, "emblem-256.png")], check=True)
-    tile = os.path.join(out, "emblem-tile.svg")
+    subprocess.run(["rsvg-convert", "-w", "1024", "-h", "1024", svg, "-o", os.path.join(out, f"emblem{SUFFIX}.png")], check=True)
+    subprocess.run(["rsvg-convert", "-w", "256", "-h", "256", svg, "-o", os.path.join(out, f"emblem{SUFFIX}-256.png")], check=True)
+    tile = os.path.join(out, f"emblem{SUFFIX}-tile.svg")
     with open(tile, "w") as f:
         f.write(emblem_svg(1024, bg=C["ink"]))
-    subprocess.run(["rsvg-convert", "-w", "512", "-h", "512", tile, "-o", os.path.join(out, "emblem-tile.png")], check=True)
+    subprocess.run(["rsvg-convert", "-w", "512", "-h", "512", tile, "-o", os.path.join(out, f"emblem{SUFFIX}-tile.png")], check=True)
     print("emblem ->", out)
 
 

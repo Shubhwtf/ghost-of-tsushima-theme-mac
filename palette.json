@@ -64,7 +64,8 @@
     "grad_start": "pampas",
     "grad_mid": "vermilion",
     "grad_end": "lacquer",
-    "icon_screen": "blood"
+    "icon_screen": "blood",
+    "blade": "paper"
   },
   "ansi": [
     "ash",
@@ -147,11 +148,12 @@
         "focus": "paper",
         "emblem": "paper",
         "emblem_deep": "mist",
-        "metal": "mist",
+        "metal": "smoke",
         "grad_start": "slate",
         "grad_mid": "rice",
         "grad_end": "paper_hi",
-        "icon_screen": "stone"
+        "icon_screen": "stone",
+        "blade": "rice"
       },
       "ansi": [
         "#1f1f1f",

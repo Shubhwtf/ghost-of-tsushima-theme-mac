@@ -14,9 +14,10 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from emblem import emblem_svg  # noqa: E402
-from palette import C, rgb  # noqa: E402
+from palette import C, ROLE, rgb  # noqa: E402
 
-INKS = {"red": C["lacquer"], "deep": C["blood"], "blade": C["paper"], "gold": C["gold"], "hilt": C["slate"]}
+INKS = {"red": ROLE["emblem"], "deep": ROLE["emblem_deep"], "blade": ROLE["blade"], "gold": ROLE["metal"],
+        "hilt": C["slate"]}
 
 
 def grid(px):
