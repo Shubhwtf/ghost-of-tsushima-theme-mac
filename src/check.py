@@ -45,6 +45,9 @@ def parse_all():
             try:
                 d = plistlib.load(open(p, "rb"))
                 n += 1
+                for fmt in (plistlib.FMT_XML, plistlib.FMT_BINARY):
+                    if plistlib.loads(plistlib.dumps(d, fmt=fmt)) != d:
+                        errors.append(f"{rel(p)}: does not round-trip as {fmt.name}")
             except Exception as e:  # noqa: BLE001
                 errors.append(f"{rel(p)}: {e}")
                 continue
@@ -52,6 +55,8 @@ def parse_all():
                 for k, v in d.items():
                     if k.endswith("Color"):
                         a = plistlib.loads(v)
+                        if plistlib.loads(plistlib.dumps(a, fmt=plistlib.FMT_BINARY)) != a:
+                            errors.append(f"{rel(p)}: {k} blob does not round-trip")
                         obj = a["$objects"][a["$top"]["root"].data]
                         if len(obj["NSRGB"].rstrip(b"\x00").split()) < 3:
                             errors.append(f"{rel(p)}: {k} has no RGB components")
