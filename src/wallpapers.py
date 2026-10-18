@@ -540,11 +540,57 @@ def scene_kurosawa(c, rng):
     c.img = bw * (1 - red) + c.img * red
 
 
+# ------------------------------------------------------------------ Guiding Wind
+def scene_wind(c, rng, light=False):
+    """Minimal: flowing dry-brush wind on black (or paper), a red 冥人 seal."""
+    xs, ys = c.grid()
+    if light:
+        washi(c, 9)
+        ink = "#1a1716"
+    else:
+        c.img[:] = hex2f(C["ink"])
+        c.screen(c.radial(1700, 1000, 2600, 1.6), "#2a2422", 0.6)
+        c.multiply(smoothstep(0.4, 0.75, c.noise(3, 6, 501, stretch=1.5)), "#6a6462", 0.25)
+        ink = C["paper"]
+    streams = [
+        ([(-250, 1660), (600, 1320), (1400, 1430), (2200, 1170), (2950, 760), (4100, 540)], 200, 0.55, [0.55, 1.0, 0.8, 1.15, 0.75, 0.45]),
+        ([(-200, 1840), (700, 1560), (1500, 1630), (2300, 1380), (3000, 1000), (4050, 830)], 56, 0.62, [0.4, 1.0, 0.55, 1.1, 0.5, 0.8, 0.3]),
+        ([(200, 1170), (1000, 990), (1800, 1090), (2500, 870), (3300, 560), (4000, 420)], 40, 0.66, [0.3, 0.9, 0.5, 1.1, 0.6, 0.3]),
+        ([(-100, 2010), (900, 1760), (1700, 1840), (2600, 1560), (3400, 1240), (4050, 1130)], 26, 0.7, [0.2, 1.0, 0.5, 0.9, 0.4]),
+        ([(700, 1500), (1250, 1330), (1750, 1420), (2300, 1240), (2800, 1050), (3300, 800)], 12, 0.6, [0.2, 1.0, 0.6, 0.9, 0.3]),
+    ]
+    total = np.zeros((c.h, c.w), np.float32)
+    for i, (ctrl, wdt, dry, press) in enumerate(streams):
+        pts = catmull_pts(ctrl, 40)
+        m = c.brush(pts, wdt, seed=520 + i, bristles=int(50 + wdt * 0.7), dry=dry, taper=(0.22, 0.45),
+                    ink_decay=0.75 if i == 0 else 0.55, pressure=press, wobble=0.05)
+        total = np.maximum(total, m * (0.97, 0.72, 0.6, 0.5, 0.45)[i])
+    c.screen(c.blur(total, 10), ink, 0.12) if not light else None
+    c.comp(total, ink, 0.96)
+    # leaves riding the wind
+    path = catmull_pts(streams[0][0], 40)
+    gold = []
+    for i in range(16):
+        px, py = path[rng.randrange(int(len(path) * 0.35), len(path))]
+        gold.append(f'<path d="{F.leaf_path(px + rng.gauss(0, 120), py + rng.gauss(-60, 110), rng.uniform(22, 38), rng.uniform(0, 6.28), "maple" if i % 3 else "petal")}"/>')
+    c.comp(c.svg_mask("".join(gold)), C["gold"] if not light else C["lacquer"], 0.95)
+    # seal and a vertical line: 風が導く (the wind guides)
+    hanko(c, 3160, 1560, 300, "冥人", seed=11)
+    col = c.svg_mask(glyphs.text_svg("風が導く", 3500, 1300, 92, "ShipporiMincho", vertical=True, spacing=0.18))
+    c.comp(col, ink, 0.9)
+
+
+def scene_wind_light(c, rng):
+    scene_wind(c, rng, light=True)
+
+
 SCENES = {
     "Higanbana": ("Higanbana", scene_higanbana, 0.03, 0.45),
     "ToriiAtDawn": ("Torii at Dawn", scene_torii, 0.022, 0.25),
     "Standoff": ("Standoff", scene_standoff, 0.03, 0.5),
     "Kurosawa": ("Kurosawa", scene_kurosawa, 0.06, 0.6),
+    "GuidingWind": ("Guiding Wind", scene_wind, 0.03, 0.35),
+    "GuidingWindPaper": ("Guiding Wind (paper)", scene_wind_light, 0.02, 0.2),
 }
 
 
