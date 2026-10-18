@@ -9,15 +9,15 @@
   },
   "display": {
     "separator": "  ",
-    "color": { "keys": "#e23d43", "title": "#f6f1e7", "output": "#ece6dc", "separator": "#3a3330" },
+    "color": { "keys": "#e5444a", "title": "#f6f1e7", "output": "#ece6dc", "separator": "#3a3330" },
     "key": { "width": 12 },
     "bar": { "char": { "elapsed": "━", "total": "━" }, "color": { "elapsed": "#c1121f", "total": "#2a2523" } },
-    "percent": { "type": ["bar", "num"], "color": { "green": "#9db97c", "yellow": "#c9a45c", "red": "#e23d43" } }
+    "percent": { "type": ["bar", "num"], "color": { "green": "#9db97c", "yellow": "#c9a45c", "red": "#e5444a" } }
   },
   "modules": [
-    { "type": "custom", "format": "{#1;38;2;226;61;67}冥人  {#0;38;2;246;241;231}GHOST OF TSUSHIMA" },
+    { "type": "custom", "format": "{#1;38;2;229;68;74}冥人  {#0;38;2;246;241;231}GHOST OF TSUSHIMA" },
     { "type": "custom", "format": "{#38;2;58;51;48}──────────────────────────────" },
-    { "type": "title", "key": "\uf007 user", "format": "{user-name}{#38;2;131;122;115}@{#}{host-name}" },
+    { "type": "title", "key": "\uf007 user", "format": "{user-name}{#38;2;135;126;119}@{#}{host-name}" },
     { "type": "os", "key": "\uf179 os" },
     { "type": "host", "key": "\uf109 host" },
     { "type": "kernel", "key": "\uf013 kernel" },

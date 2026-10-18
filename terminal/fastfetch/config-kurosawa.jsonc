@@ -1,0 +1,37 @@
+// Ghost of Tsushima Kurosawa — generated from palette.json by src/shell.py
+// ~/.config/fastfetch/config.jsonc
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file-raw",
+    "source": "~/.config/fastfetch/ghost-kurosawa.ansi",
+    "padding": { "top": 1, "left": 2, "right": 4 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "#f0f0f0", "title": "#f5f5f5", "output": "#e4e4e4", "separator": "#3a3a3a" },
+    "key": { "width": 12 },
+    "bar": { "char": { "elapsed": "━", "total": "━" }, "color": { "elapsed": "#5e5e5e", "total": "#262626" } },
+    "percent": { "type": ["bar", "num"], "color": { "green": "#a8a8a8", "yellow": "#b8b8b8", "red": "#f0f0f0" } }
+  },
+  "modules": [
+    { "type": "custom", "format": "{#1;38;2;240;240;240}冥人  {#0;38;2;245;245;245}GHOST OF TSUSHIMA" },
+    { "type": "custom", "format": "{#38;2;58;58;58}──────────────────────────────" },
+    { "type": "title", "key": "\uf007 user", "format": "{user-name}{#38;2;128;128;128}@{#}{host-name}" },
+    { "type": "os", "key": "\uf179 os" },
+    { "type": "host", "key": "\uf109 host" },
+    { "type": "kernel", "key": "\uf013 kernel" },
+    { "type": "uptime", "key": "\uf017 uptime" },
+    { "type": "packages", "key": "\uf487 pkgs" },
+    { "type": "shell", "key": "\uf120 shell" },
+    { "type": "terminal", "key": "\ue795 term" },
+    { "type": "terminalfont", "key": "\uf031 font" },
+    { "type": "cpu", "key": "\uf2db cpu", "showPeCoreCount": true },
+    { "type": "gpu", "key": "\uf26c gpu" },
+    { "type": "memory", "key": "\uefc5 memory" },
+    { "type": "disk", "key": "\uf0a0 disk", "folders": "/" },
+    { "type": "battery", "key": "\uf240 battery" },
+    "break",
+    { "type": "colors", "symbol": "circle", "paddingLeft": 2 }
+  ]
+}

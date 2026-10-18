@@ -8,7 +8,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from palette import C, NAME, ROLE, SLUG, rgb  # noqa: E402
+from palette import C, MONO, NAME, ROLE, SLUG, SUFFIX, rgb  # noqa: E402
 import halfblock  # noqa: E402
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -34,12 +34,20 @@ G = {
 
 
 def starship():
+    if MONO:   # no hue to tell success from failure: change the glyph and the weight instead
+        CHAR = (f'success_symbol = "[{G["katana"]} ❯](fg:mist)"\n'
+                f'error_symbol = "[{G["katana"]} ✗](bold fg:paper_hi)"\n'
+                f'vimcmd_symbol = "[{G["katana"]} ❮](bold fg:rice)"')
+    else:
+        CHAR = (f'success_symbol = "[{G["katana"]} ❯](bold fg:crimson)"\n'
+                f'error_symbol = "[{G["katana"]} ❯](bold fg:gold)"\n'
+                f'vimcmd_symbol = "[{G["katana"]} ❮](bold fg:moss)"')
     pal = "\n".join(f'{k} = "{v}"' for k, v in C.items())
     t = f"""# {HEADER}
 # 冥人 — ink, lacquer and gold leaf. Needs a Nerd Font.
 "$schema" = "https://starship.rs/config-schema.json"
 
-palette = "ghost_of_tsushima"
+palette = "{SLUG.replace('-', '_')}"
 add_newline = true
 command_timeout = 800
 
@@ -59,7 +67,7 @@ $cmd_duration\\
 $time
 $character\"\"\"
 
-[palettes.ghost_of_tsushima]
+[palettes.{SLUG.replace('-', '_')}]
 {pal}
 
 [directory]
@@ -142,9 +150,7 @@ time_format = "%H:%M"
 format = "[{G['round_l']}](fg:ash)[ {G['clock']} $time ](fg:mist bg:ash)[{G['round_r']}](fg:ash)"
 
 [character]
-success_symbol = "[{G['katana']} ❯](bold fg:crimson)"
-error_symbol = "[{G['katana']} ❯](bold fg:gold)"
-vimcmd_symbol = "[{G['katana']} ❮](bold fg:moss)"
+{CHAR}
 
 [username]
 show_always = false
@@ -155,7 +161,7 @@ format = "[$user ]($style)"
 ssh_only = true
 format = "[@$hostname ](fg:pampas)"
 """
-    write("shell/starship.toml", t)
+    write(f"shell/starship{SUFFIX}.toml", t)
 
 
 def ansi_fg(h):
@@ -183,7 +189,7 @@ def zsh():
         f"uu={ansi_fg(C['mist'])}", f"un={ansi_fg(C['vermilion'])}", f"gu={ansi_fg(C['mist'])}", f"gn={ansi_fg(C['vermilion'])}",
         f"da={ansi_fg(C['smoke'])}", f"in={ansi_fg(C['smoke'])}", f"bl={ansi_fg(C['smoke'])}",
         f"hd={ansi_fg(C['gold'])};4", f"lp={ansi_fg(C['jade'])}", f"cc={ansi_fg(C['vermilion'])}",
-        f"ga={ansi_fg(C['moss'])}", f"gm={ansi_fg(C['gold'])}", f"gd={ansi_fg(C['crimson'])}",
+        f"ga={ansi_fg(C['moss'])}{';1' if MONO else ''}", f"gm={ansi_fg(C['gold'])}", f"gd={ansi_fg(C['crimson'])}{';9' if MONO else ''}",
         f"gv={ansi_fg(C['sky'])}", f"gt={ansi_fg(C['sakura'])}", f"gi={ansi_fg(C['slate'])}",
         f"xx={ansi_fg(C['slate'])}", f"im={ansi_fg(C['sakura'])}", f"vi={ansi_fg(C['sakura'])}",
         f"mu={ansi_fg(C['sky'])}", f"co={ansi_fg(C['gold'])}", f"tm={ansi_fg(C['smoke'])}",
@@ -192,14 +198,14 @@ def zsh():
         f"*.toml={ansi_fg(C['gold'])}"])
     t = f"""# {HEADER}
 # 冥人 — source this from ~/.zshrc (the installer adds the line for you):
-#   source ~/.config/ghost-of-tsushima/ghost-of-tsushima.zsh
+#   source ~/.config/ghost-of-tsushima/{SLUG}.zsh
 # Load it AFTER zsh-syntax-highlighting / zsh-autosuggestions if you use them.
 
 # ---- zsh-syntax-highlighting -------------------------------------------
 typeset -gA ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_STYLES[default]='fg={C['paper']}'
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg={C['crimson']},bold'
-ZSH_HIGHLIGHT_STYLES[reserved-word]='fg={C['crimson']}'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg={C['crimson']},bold{',underline' if MONO else ''}'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg={C['crimson']}{',bold' if MONO else ''}'
 ZSH_HIGHLIGHT_STYLES[alias]='fg={C['gold_hi']}'
 ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg={C['gold_hi']},underline'
 ZSH_HIGHLIGHT_STYLES[global-alias]='fg={C['gold_hi']}'
@@ -220,8 +226,8 @@ ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]='fg={C['mist']}'
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg={C['sky']}'
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg={C['sky']}'
 ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg={C['jade']}'
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg={C['moss']}'
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg={C['moss']}'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg={C['moss']}{',italic' if MONO else ''}'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg={C['moss']}{',italic' if MONO else ''}'
 ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg={C['moss']}'
 ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg={C['jade']}'
 ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg={C['jade']}'
@@ -236,7 +242,7 @@ ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg={C['sky']}'
 ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='fg={C['ink']},bg={C['gold']}'
 
 # ---- zsh-autosuggestions -------------------------------------------------
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#6b625c'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg={C['suggest']}{',italic' if MONO else ''}'
 
 # ---- fzf -------------------------------------------------------------------
 export FZF_DEFAULT_OPTS="${{FZF_DEFAULT_OPTS:+$FZF_DEFAULT_OPTS }}--color={fzf} --border=rounded --prompt='❯ ' --pointer='◆' --marker='✓' --separator='─' --scrollbar='│' --info=inline-right"
@@ -263,11 +269,11 @@ if [[ -z "$GOT_NO_STARSHIP" ]] && command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
 """
-    write("shell/ghost-of-tsushima.zsh", t)
+    write(f"shell/{SLUG}.zsh", t)
 
 
 def fastfetch():
-    write("terminal/fastfetch/ghost.ansi", halfblock.ansi(30))
+    write(f"terminal/fastfetch/ghost{SUFFIX}.ansi", halfblock.ansi(30))
     k = C["crimson"]
     t = f"""// {HEADER}
 // ~/.config/fastfetch/config.jsonc
@@ -275,7 +281,7 @@ def fastfetch():
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {{
     "type": "file-raw",
-    "source": "~/.config/fastfetch/ghost.ansi",
+    "source": "~/.config/fastfetch/ghost{SUFFIX}.ansi",
     "padding": {{ "top": 1, "left": 2, "right": 4 }}
   }},
   "display": {{
@@ -307,7 +313,7 @@ def fastfetch():
   ]
 }}
 """
-    write("terminal/fastfetch/config.jsonc", t)
+    write(f"terminal/fastfetch/config{SUFFIX}.jsonc", t)
 
 
 if __name__ == "__main__":

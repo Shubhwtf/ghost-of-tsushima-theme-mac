@@ -1,0 +1,155 @@
+# Ghost of Tsushima Kurosawa — generated from palette.json by src/shell.py
+# 冥人 — ink, lacquer and gold leaf. Needs a Nerd Font.
+"$schema" = "https://starship.rs/config-schema.json"
+
+palette = "ghost_of_tsushima_kurosawa"
+add_newline = true
+command_timeout = 800
+
+format = """
+[](fg:lacquer)\
+[ 冥 ](bold fg:paper_hi bg:lacquer)\
+[](fg:lacquer bg:blood)\
+$directory\
+[](fg:blood bg:stone)\
+$git_branch\
+$git_status\
+[](fg:stone bg:ash)\
+$nodejs$python$rust$golang$lua$bun$docker_context\
+[](fg:ash)\
+$fill\
+$cmd_duration\
+$time
+$character"""
+
+[palettes.ghost_of_tsushima_kurosawa]
+ink = "#0a0a0a"
+charcoal = "#121212"
+ash = "#1c1c1c"
+stone = "#262626"
+slate = "#3a3a3a"
+smoke = "#808080"
+mist = "#a6a6a6"
+rice = "#c4c4c4"
+paper = "#e4e4e4"
+paper_hi = "#f5f5f5"
+blood = "#404040"
+lacquer = "#5e5e5e"
+crimson = "#f0f0f0"
+vermilion = "#fafafa"
+ember = "#d0d0d0"
+gold = "#b8b8b8"
+gold_hi = "#dcdcdc"
+pampas = "#c8c8c8"
+indigo = "#7f7f7f"
+sky = "#b0b0b0"
+bamboo = "#8f8f8f"
+moss = "#a8a8a8"
+sakura = "#9c9c9c"
+blossom = "#bcbcbc"
+patina = "#b2b2b2"
+jade = "#c0c0c0"
+suggest = "#5c5c5c"
+diff_add = "#2a2a2a"
+diff_add_emph = "#474747"
+diff_change = "#1f1f1f"
+diff_delete = "#0b0b0b"
+diff_delete_emph = "#000000"
+diff_text = "#3a3a3a"
+vt_error = "#202020"
+vt_warn = "#1c1c1c"
+vt_info = "#181818"
+vt_hint = "#181818"
+
+[directory]
+style = "bold fg:paper_hi bg:blood"
+format = "[ $path ]($style)[$read_only]($read_only_style)"
+read_only = " "
+read_only_style = "fg:gold_hi bg:blood"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = " ~"
+
+[directory.substitutions]
+"Documents" = " Documents"
+"Developer" = " Developer"
+"Projects" = " Projects"
+
+[git_branch]
+symbol = ""
+style = "bg:stone"
+format = "[[ $symbol $branch ](fg:gold_hi bg:stone)]($style)"
+
+[git_status]
+style = "bg:stone"
+format = "[[($all_status$ahead_behind )](fg:blossom bg:stone)]($style)"
+conflicted = "⚔"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕"
+modified = "~"
+staged = "+"
+untracked = "?"
+deleted = "✗"
+stashed = "≡"
+
+[nodejs]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:moss bg:ash)]($style)"
+
+[python]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version)( \\($virtualenv\\)) ](fg:sky bg:ash)]($style)"
+
+[rust]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:ember bg:ash)]($style)"
+
+[golang]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:jade bg:ash)]($style)"
+
+[lua]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:sky bg:ash)]($style)"
+
+[bun]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:pampas bg:ash)]($style)"
+
+[docker_context]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $context) ](fg:sky bg:ash)]($style)"
+
+[fill]
+symbol = " "
+
+[cmd_duration]
+min_time = 1500
+format = "[ $duration ](fg:gold)"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[](fg:ash)[  $time ](fg:mist bg:ash)[](fg:ash)"
+
+[character]
+success_symbol = "[\U000f04e5 ❯](fg:mist)"
+error_symbol = "[\U000f04e5 ✗](bold fg:paper_hi)"
+vimcmd_symbol = "[\U000f04e5 ❮](bold fg:rice)"
+
+[username]
+show_always = false
+style_user = "fg:pampas"
+format = "[$user ]($style)"
+
+[hostname]
+ssh_only = true
+format = "[@$hostname ](fg:pampas)"
