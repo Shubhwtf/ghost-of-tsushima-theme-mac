@@ -12,7 +12,8 @@ return {
       require("telescope").setup({
         defaults = {
           layout_strategy = "horizontal",
-          layout_config = { width = 0.9, height = 0.9, preview_width = 0.6 },
+          sorting_strategy = "ascending",
+          layout_config = { prompt_position = "top", width = 0.9, height = 0.85, preview_width = 0.58 },
           prompt_prefix = " \u{f002}  ",
           selection_caret = "\u{25c6} ",
           entry_prefix = "  ",
@@ -143,7 +144,6 @@ return {
         btn("f", "\u{f002}", "Find file", "<cmd>Telescope find_files<CR>"),
         btn("r", "\u{f1da}", "Recent files", "<cmd>Telescope oldfiles<CR>"),
         btn("g", "\u{f15c}", "Grep", "<cmd>Telescope live_grep<CR>"),
-        btn("e", "\u{f15b}", "New file", "<cmd>ene<CR>"),
         btn("c", "\u{f013}", "Config", "<cmd>e $MYVIMRC<CR>"),
         btn("l", "\u{f0332}", "Lazy", "<cmd>Lazy<CR>"),
         btn("q", "\u{f011}", "Quit", "<cmd>qa<CR>"),
@@ -159,7 +159,7 @@ return {
       dash.section.footer.val = "\u{2014} " .. mottos[math.random(#mottos)]
       dash.section.footer.opts.hl = "AlphaFooter"
       dash.config.layout = {
-        { type = "padding", val = 2 },
+        { type = "padding", val = 1 },
         dash.section.header,
         { type = "padding", val = 2 },
         dash.section.buttons,
