@@ -1,0 +1,19 @@
+local c = require("got.palette")
+
+return {
+  normal = {
+    a = { fg = c.paper_hi, bg = c.lacquer, gui = "bold" },
+    b = { fg = c.paper, bg = c.stone },
+    c = { fg = c.mist, bg = c.ash },
+  },
+  insert = { a = { fg = c.ink, bg = c.moss, gui = "bold" }, b = { fg = c.paper, bg = c.stone } },
+  visual = { a = { fg = c.ink, bg = c.gold, gui = "bold" }, b = { fg = c.paper, bg = c.stone } },
+  replace = { a = { fg = c.ink, bg = c.ember, gui = "bold" }, b = { fg = c.paper, bg = c.stone } },
+  command = { a = { fg = c.ink, bg = c.sky, gui = "bold" }, b = { fg = c.paper, bg = c.stone } },
+  terminal = { a = { fg = c.ink, bg = c.jade, gui = "bold" }, b = { fg = c.paper, bg = c.stone } },
+  inactive = {
+    a = { fg = c.smoke, bg = c.ash },
+    b = { fg = c.smoke, bg = c.ash },
+    c = { fg = c.smoke, bg = c.ash },
+  },
+}
