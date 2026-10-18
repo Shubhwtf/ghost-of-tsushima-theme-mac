@@ -85,17 +85,17 @@ def katana_svg(x0, y0, x1, y1, scale, blade="#ece6dc", edge="#0b0a0a", gold="#c9
     return "".join(g)
 
 
-def emblem_svg(size=1024, bg=None, red=None):
+def emblem_svg(size=1024, bg=None, red=None, small=False):
     red = red or C["lacquer"]
     cx = cy = size / 2
     r = size * 0.34
-    paths = enso_paths(cx, cy, r, size * 0.12)
+    paths = enso_paths(cx, cy, r, size * (0.16 if small else 0.12), bristles=14 if small else 26)
     body = []
     if bg:
         body.append(f'<rect width="{size}" height="{size}" rx="{size * 0.22:.0f}" fill="{bg}"/>')
     body.append(f'<g fill="none" stroke="{red}" stroke-linecap="round" stroke-linejoin="round">{"".join(paths)}</g>')
     s = size / 100
-    body.append(katana_svg(size * 0.17, size * 0.83, size * 0.86, size * 0.12, s * 1.9))
+    body.append(katana_svg(size * 0.17, size * 0.83, size * 0.86, size * 0.12, s * (3.4 if small else 1.9)))
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">'
             + "".join(body) + "</svg>\n")
 
