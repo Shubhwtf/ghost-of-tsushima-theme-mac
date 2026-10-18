@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Ghost of Tsushima — generated from palette.json by src/desktop.py
+# JankyBorders: ~/.config/borders/bordersrc (brew install FelixKratz/formulae/borders)
+# Focused window: lacquer red. Everything else: ash.
+options=(
+  style=round
+  width=5.0
+  hidpi=on
+  order=above
+  active_color=0xffc1121f
+  inactive_color=0xff1e1b1a
+)
+
+borders "${options[@]}"
