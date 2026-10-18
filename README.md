@@ -20,6 +20,7 @@ terminals, prompt, editor, menu bar, window borders and six wallpapers painted e
 
 | Component | Description |
 |---|---|
+| **Variants** | The red *Ghost of Tsushima* theme, and **Kurosawa mode**: every component below in pure black and white, after the game's film mode. Switch with `./install.sh --variant kurosawa` or `--variant red` |
 | **Wallpapers** | Six original scenes painted by [`src/wallpapers.py`](src/wallpapers.py) at your screen's exact resolution: *Higanbana*, *Torii at Dawn*, *Standoff*, *Kurosawa*, *Guiding Wind* and a light *Guiding Wind (paper)*. Plus a picker for top-rated 4K fan art from wallhaven |
 | **Emblem** | A red ensō brush circle cut by a katana, drawn bristle by bristle as pure SVG ([`assets/emblem.svg`](assets/emblem.svg)) |
 | **Terminal.app** | A real profile (`NSKeyedArchiver` colour blobs), imported and set as the default for new windows |
@@ -64,8 +65,46 @@ Every colour comes from one file, [`palette.json`](palette.json). The configs ar
 <details>
 <summary><b>How these were made</b></summary>
 
-These are **preview renders (terminal captured live, macOS chrome composited)**. Every terminal frame is a real capture of kitty running the theme's own configs, starship, fastfetch, Neovim and btop. The captures ran in a sandbox with a throwaway home, user and hostname, so no personal details appear. The macOS parts (menu bar, window chrome, traffic lights, borders) are drawn by [`src/previews.py`](src/previews.py) from the same colours and items as the SketchyBar and JankyBorders configs.
+These are **preview renders (terminal captured live, macOS chrome composited)**. Every terminal frame is a real capture of kitty running the theme's own configs, starship, fastfetch, Neovim and btop. The same goes for the Kurosawa previews below, captured with the Kurosawa configs. The captures ran in a sandbox with a throwaway home, user and hostname, so no personal details appear. The macOS parts (menu bar, window chrome, traffic lights, borders) are drawn by [`src/previews.py`](src/previews.py) from the same colours and items as the SketchyBar and JankyBorders configs.
 </details>
+
+## Kurosawa mode (black & white)
+
+![Kurosawa mode: fastfetch in kitty on the black-and-white Higanbana](assets/screenshots/kurosawa-hero.jpg)
+
+<sub>Preview render (terminal captured live, macOS chrome composited): kitty with the Kurosawa configs. Wallpaper: <i>Higanbana</i>, black and white.</sub>
+
+A second variant, named after the game's Kurosawa film mode, takes all the colour out. Every component (terminals, prompt, Neovim, btop, the menu bar, borders, the emblem and the wallpapers) is pure grayscale, and meaning moves into lightness, weight and slant instead: keywords are bold, types italic, deletions struck through, and the 16 ANSI greys sit on an even lightness ramp so each one stays distinguishable. On macOS it switches the accent and the window buttons to graphite, so no hue survives anywhere on screen.
+
+<table>
+<tr>
+<td><img src="assets/screenshots/kurosawa-tiled.jpg" alt="Kurosawa mode, tiled: Neovim, fastfetch and btop"/></td>
+<td><img src="assets/screenshots/kurosawa-code.jpg" alt="Kurosawa mode: Neovim with neo-tree on Torii at Dawn"/></td>
+</tr>
+<tr>
+<td align="center"><sub>Neovim, fastfetch and btop. <i>Kurosawa</i></sub></td>
+<td align="center"><sub>Neovim with neo-tree. <i>Torii at Dawn</i></sub></td>
+</tr>
+<tr>
+<td><img src="assets/screenshots/kurosawa-dashboard.jpg" alt="Kurosawa mode: the Neovim ensō dashboard on Guiding Wind"/></td>
+<td><img src="assets/screenshots/kurosawa-btop.jpg" alt="Kurosawa mode: btop on Standoff"/></td>
+</tr>
+<tr>
+<td align="center"><sub>The ensō dashboard. <i>Guiding Wind</i></sub></td>
+<td align="center"><sub>btop watching the wallpapers render. <i>Standoff</i></sub></td>
+</tr>
+</table>
+
+<sub>All preview renders (terminal captured live, macOS chrome composited), on the black-and-white versions of the original wallpapers.</sub>
+
+Switch whenever you like; your original backups are kept, and `./uninstall.sh` works from either variant:
+
+```bash
+./install.sh --variant kurosawa --all --wallpaper Kurosawa   # black and white
+./install.sh --variant red --all --wallpaper Higanbana        # back to red
+```
+
+Re-running with the other variant swaps only the theme files it installed. In Neovim you can also flip it per session with `vim.g.got_variant = "kurosawa"` before the colorscheme loads, or `:colorscheme ghost-of-tsushima-kurosawa`. The black-and-white wallpapers come from the same script: `python3 scripts/wallpapers.py --variant kurosawa --originals all`.
 
 ## Wallpapers
 
@@ -109,6 +148,7 @@ git clone https://github.com/Shubhwtf/ghost-of-tsushima-theme-mac.git
 cd ghost-of-tsushima-theme-mac
 
 ./install.sh --brew --all --wallpaper Higanbana   # tools, every component, and a wallpaper
+./install.sh --variant kurosawa --all             # the same in black and white (Kurosawa mode)
 ```
 
 Or pick what you want:
@@ -121,9 +161,12 @@ Or pick what you want:
 ./install.sh --brew         # sketchybar, borders, starship, fastfetch, btop, bat, delta, eza, fzf, lazygit,
                             # neovim, zsh plugins, JetBrains Mono Nerd Font, Ghostty
 ./install.sh --wallpaper Kurosawa   # or a number from scripts/wallpapers.py --list, or an image path
+./install.sh --variant kurosawa ... # any of the above in black and white; --variant red switches back
 ```
 
-Before it changes anything, the installer copies every config it touches to `~/.got-backup-<timestamp>`. Existing configs are moved there, never deleted. On Linux it installs only the cross-platform parts (terminals, shell, Neovim) and skips the macOS layer.
+`--variant red` (the default) or `--variant kurosawa` picks the colour set for every component in the same run. Run the installer again with the other variant to switch: it replaces only the files it installed itself, swaps the one theme line in `~/.zshrc` and sets `vim.g.got_variant` in the Neovim config.
+
+Before it changes anything, the installer copies every config of yours it touches to `~/.got-backup-<timestamp>`. Existing configs are moved there, never deleted, and files the theme put down itself are never backed up as yours. On Linux it installs only the cross-platform parts (terminals, shell, Neovim) and skips the macOS layer.
 
 <details>
 <summary><b>Terminals</b></summary>
@@ -131,7 +174,7 @@ Before it changes anything, the installer copies every config it touches to `~/.
 - **Terminal.app**: the profile is imported with `open` and set as the default and startup profile. A themed window opens once during the import; new windows use it from then on. Or double-click [`terminal/terminal-app/Ghost of Tsushima.terminal`](terminal/terminal-app) yourself.
 - **iTerm2**: the Dynamic Profile appears as *Ghost of Tsushima* in *Settings › Profiles*. Pick *Other Actions › Set as Default*. The colours alone are in [`Ghost of Tsushima.itermcolors`](terminal/iterm2) (*Colors › Color Presets › Import*).
 - **Ghostty**: `~/.config/ghostty/config` and `themes/ghost-of-tsushima`.
-- **kitty**: `~/.config/kitty/kitty.conf` includes `themes/ghost-of-tsushima.conf`.
+- **kitty**: `~/.config/kitty/kitty.conf` includes `themes/ghost-of-tsushima.conf` (or `ghost-of-tsushima-kurosawa.conf`).
 - **Alacritty**: `~/.config/alacritty/themes/ghost-of-tsushima.toml`. If you already have an `alacritty.toml`, add `[general] import = ["~/.config/alacritty/themes/ghost-of-tsushima.toml"]`.
 - **WezTerm**: [`terminal/wezterm/wezterm.lua`](terminal/wezterm/wezterm.lua) is a complete config. If you already have one, it is installed next to yours as `ghost-of-tsushima.lua`.
 - **btop**: `color_theme = "ghost-of-tsushima"`. **bat**: `BAT_THEME="Ghost of Tsushima"` (set by the zsh file). **delta**: included from `~/.gitconfig` as the `ghost-of-tsushima` feature. **lazygit**: installed as `config.yml` if you have none, otherwise next to it.
@@ -147,7 +190,7 @@ Before it changes anything, the installer copies every config it touches to `~/.
 <details>
 <summary><b>Neovim</b></summary>
 
-[`dotfiles/nvim`](dotfiles/nvim) is a complete lazy.nvim config for Neovim 0.11+: telescope, the `main` branch of nvim-treesitter, neo-tree v3, lualine with slanted separators, bufferline, an alpha dashboard with the half-block ensō, gitsigns, which-key, indent guides and autopairs. It needs a Nerd Font and the tree-sitter CLI (`brew install tree-sitter`).
+[`dotfiles/nvim`](dotfiles/nvim) is a complete lazy.nvim config for Neovim 0.12+ (the `main` branch of nvim-treesitter needs it): telescope, the `main` branch of nvim-treesitter, neo-tree v3, lualine with slanted separators, bufferline, an alpha dashboard with the half-block ensō, gitsigns, which-key, indent guides and autopairs. It needs a Nerd Font and the tree-sitter CLI (`brew install tree-sitter`).
 
 Only want the colours? Copy `colors/ghost-of-tsushima.lua`, `lua/got` and `lua/lualine/themes` into your config and run `:colorscheme ghost-of-tsushima`.
 
@@ -163,8 +206,8 @@ Only want the colours? Copy `colors/ghost-of-tsushima.lua`, `lua/got` and `lua/l
 <summary><b>Menu bar, borders and appearance</b></summary>
 
 - **SketchyBar** (`~/.config/sketchybar`): the bar draws its own menu, so `--extras` also auto-hides the macOS menu bar. Clicking a kanji space focuses it through yabai if you have it, otherwise through Mission Control's *Ctrl+number* shortcuts (enable them in *System Settings › Keyboard › Keyboard Shortcuts › Mission Control*). The scripts only need `/bin/bash`, `pmset`, `osascript` and `networksetup`.
-- **JankyBorders** (`~/.config/borders/bordersrc`): round, 5 pt, lacquer red when focused.
-- **[`macos/defaults.sh`](macos/defaults.sh)**: dark mode, `AppleAccentColor = 0` (red), a red highlight colour and medium sidebar icons. `--extras` adds Dock auto-hide with no delay, no recent apps, the scale effect, and in Finder the path bar, status bar, file extensions and folders first. The old value of every key is written to `~/.got-backup-<timestamp>/restore-defaults.sh` before it is changed.
+- **JankyBorders** (`~/.config/borders/bordersrc`): round, 5 pt, lacquer red when focused (silver in Kurosawa mode).
+- **[`macos/defaults.sh`](macos/defaults.sh)**: dark mode, `AppleAccentColor = 0` (red), a red highlight colour and medium sidebar icons. With `--variant kurosawa`: the graphite accent (`-1`), graphite window buttons (`AppleAquaColorVariant = 6`) and a neutral gray highlight. `--extras` adds Dock auto-hide with no delay, no recent apps, the scale effect, and in Finder the path bar, status bar, file extensions and folders first. The old value of every key is written to `~/.got-backup-<timestamp>/restore-defaults.sh` before it is changed.
 - **VS Code / Cursor**: merge [`vscode/settings.json`](vscode/settings.json) into your user settings.
 </details>
 
@@ -175,7 +218,7 @@ Only want the colours? Copy `colors/ghost-of-tsushima.lua`, `lua/got` and `lua/l
 ./uninstall.sh --keep-defaults  # same, but leave dark mode and the red accent on
 ```
 
-The uninstaller moves the theme's files to `~/.got-removed-<timestamp>`, puts back the configs from your first `~/.got-backup-*`, removes the theme's lines from `~/.zshrc`, switches Terminal.app back to *Basic* and replays `restore-defaults.sh`. Nothing is deleted.
+The uninstaller moves the theme's files to `~/.got-removed-<timestamp>`, puts back your configs from the `~/.got-backup-*` folders (the oldest copy of each file wins), removes the theme's lines from `~/.zshrc`, switches Terminal.app back to *Basic* and replays `restore-defaults.sh`. Nothing is deleted.
 
 ## Palette
 
@@ -208,6 +251,8 @@ The uninstaller moves the theme's files to `~/.got-removed-<timestamp>`, puts ba
 
 The 16 ANSI colours, in order: ash, crimson, bamboo, gold, indigo, sakura, patina, rice, then smoke, vermilion, moss, bright gold, sky, blossom, jade and bright paper.
 
+**Kurosawa mode** uses the same names in pure gray (`variants.kurosawa` in [`palette.json`](palette.json)): background `#121212`, text `#e4e4e4` (14.7:1), selection `#404040` (9.5:1 with bright text). Its 16 ANSI colours are an even CIE lightness ramp from `#808080` to `#ffffff` (about 3.3 L* apart, at least 6 L* within the normal and the bright set), so every text colour reaches 4.5:1 and no two can be confused.
+
 ## Building from source
 
 Every config, the emblem and the wallpapers are generated from [`palette.json`](palette.json) by the scripts in [`src/`](src):
@@ -219,8 +264,12 @@ python3 src/nvim.py          # Neovim palette and the dashboard ensō
 python3 src/desktop.py       # SketchyBar, JankyBorders, VS Code
 python3 src/emblem.py assets # emblem.svg / .png
 python3 src/wallpapers.py --res 3840x2160 --out build/wallpapers   # all six scenes
-python3 src/palette.py       # print the WCAG contrast of every colour
+python3 src/palette.py       # print the WCAG contrast of every colour and check both variants
+python3 src/check.py         # every generated file parses, plists round-trip, Kurosawa has no hue
+GOT_VARIANT=kurosawa python3 src/terminals.py   # any generator, for the Kurosawa variant
 ```
+
+[`src/grayscale.py`](src/grayscale.py) is the Kurosawa audit on its own: it scans the variant's palette and every `*kurosawa*` file (hex, `0xAARRGGBB`, `rgb()`, truecolour and 256-colour escapes, plist colour components, Terminal.app colour blobs, every pixel of the images) for any colour that is not pure gray. With `--nvim` it also starts your installed Neovim headless in Kurosawa mode, loads every plugin and checks every highlight group.
 
 They need Python 3.10+, `numpy`, `pillow` and `rsvg-convert` (librsvg). `src/glyphs.py build` re-extracts the kanji outlines and needs `fonttools`.
 
@@ -230,12 +279,13 @@ They need Python 3.10+, `numpy`, `pillow` and `rsvg-convert` (librsvg). `src/gly
 Tested on Linux:
 
 - every generated file parses: the Terminal.app plist and each colour blob round-trip through `plistlib`, plus TOML, JSON, YAML and the `.tmTheme`
-- `kitty.conf` loads with kitty's own parser
-- Neovim starts headless with no messages, and its plugins and parsers install
-- all shell scripts pass `bash -n` and shellcheck
-- an install and uninstall round trip in a throwaway home restores every original file
+- both `kitty.conf` files load with kitty's own parser, with no bad lines
+- Neovim 0.12 starts headless with no messages, red and Kurosawa, and its plugins and parsers install
+- the Kurosawa variant has no hue: the file audit above, every Neovim highlight group with all plugins loaded, and every pixel of the live kitty captures (fastfetch, starship, eza, Neovim with neo-tree, btop) is pure gray
+- all shell scripts pass shellcheck
+- install and uninstall round trips in a throwaway home restore every original file: Kurosawa then red, single components then everything, and a home with no configs at all
 
-Written against the documented APIs but not yet run on a real Mac: the SketchyBar items, the Terminal.app import, and the `defaults` keys. Issues and fixes are welcome.
+Written against the documented APIs but not yet run on a real Mac: the SketchyBar items, the Terminal.app import, and the `defaults` keys (including the graphite ones for Kurosawa mode). Issues and fixes are welcome.
 </details>
 
 ## Credits
