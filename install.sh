@@ -135,7 +135,7 @@ install_brew() {
     brew install sketchybar borders starship fastfetch btop bat git-delta eza fzf lazygit neovim \
                  tree-sitter zsh-syntax-highlighting zsh-autosuggestions librsvg ripgrep fd || true
     say "Homebrew: fonts and Ghostty"
-    brew install --cask font-jetbrains-mono-nerd-font font-symbols-only-nerd-font ghostty || true
+    brew install --cask font-jetbrains-mono-nerd-font ghostty || true
     note "optional: pip3 install numpy pillow   (to render the original wallpapers yourself)"
 }
 
