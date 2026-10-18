@@ -44,6 +44,16 @@ return {
     end,
   },
   {
+    "nvim-tree/nvim-web-devicons",
+    lazy = true,
+    config = function(_, opts)
+      require("nvim-web-devicons").setup(opts)
+      if vim.g.got_variant == "kurosawa" then
+        require("got").gray_devicons()
+      end
+    end,
+  },
+  {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
     dependencies = {

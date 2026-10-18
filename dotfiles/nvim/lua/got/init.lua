@@ -241,7 +241,29 @@ local function groups(c, cfg)
     NeoTreeGitModified = { fg = c.gold },
     NeoTreeGitDeleted = { fg = c.crimson },
     NeoTreeGitUntracked = { fg = c.ember },
+    NeoTreeGitUnstaged = { fg = c.ember },
+    NeoTreeGitStaged = { fg = c.moss },
+    NeoTreeGitRenamed = { fg = c.sky },
+    NeoTreeGitConflict = { fg = c.crimson, bold = true },
+    NeoTreeGitIgnored = { fg = c.smoke },
+    NeoTreeModified = { fg = c.gold },
     NeoTreeTitleBar = { fg = c.paper_hi, bg = c.lacquer },
+
+    -- Neovim's own defaults, so no built-in colour shows through ----------------
+    OkMsg = { fg = c.moss },
+    DiagnosticDeprecated = { sp = c.smoke, strikethrough = true },
+    DiagnosticUnderlineOk = { sp = c.moss, underline = true },
+    FloatShadow = { bg = c.ink, blend = 80 },
+    FloatShadowThrough = { bg = c.ink, blend = 100 },
+    PmenuShadow = { bg = c.ink, blend = 80 },
+    PmenuShadowThrough = { bg = c.ink, blend = 100 },
+    NvimInternalError = { fg = c.paper_hi, bg = c.blood },
+    NvimFigureBrace = { link = "NvimInternalError" },
+    NvimSingleQuotedUnknownEscape = { link = "NvimInternalError" },
+    NvimInvalidSingleQuotedUnknownEscape = { link = "NvimInternalError" },
+    RedrawDebugClear = { bg = c.diff_change },
+    RedrawDebugComposed = { bg = c.diff_add },
+    RedrawDebugRecompose = { bg = c.diff_delete },
 
     -- other plugins -------------------------------------------------------------
     WhichKey = { fg = c.crimson },
@@ -286,9 +308,36 @@ local function mono(c)
     GitSignsChange = { fg = c.mist }, GitSignsDelete = { fg = c.smoke },
     NeoTreeGitAdded = { bold = true }, NeoTreeGitModified = { italic = true },
     NeoTreeGitDeleted = { strikethrough = true }, NeoTreeGitUntracked = { italic = true },
+    NeoTreeGitUnstaged = { italic = true }, NeoTreeGitStaged = { bold = true },
+    NeoTreeGitConflict = { bold = true, underline = true },
     ["@markup.heading"] = { bold = true }, ["@markup.heading.1"] = { bold = true, underline = true },
     IncSearch = { bold = true }, CurSearch = { bold = true }, Todo = { bold = true },
   }
+end
+
+-- Kurosawa: file icons keep their own lightness but lose their hue, mapped into
+-- the smoke..paper range so every icon stays readable on the background
+function M.gray_devicons()
+  local ok, devicons = pcall(require, "nvim-web-devicons")
+  if not ok then return end
+  local function y(hex)
+    local r, g, b = tonumber(hex:sub(2, 3), 16), tonumber(hex:sub(4, 5), 16), tonumber(hex:sub(6, 7), 16)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  end
+  local lo, hi = y(M.palette.smoke), y(M.palette.paper)
+  local function gray(hex)
+    local v = math.floor(lo + (hi - lo) * y(hex) / 255 + 0.5)
+    return string.format("#%02x%02x%02x", v, v, v)
+  end
+  local icons = {}
+  for key, icon in pairs(devicons.get_icons()) do
+    if type(key) == "string" and type(icon) == "table" and icon.color then
+      icons[key] = vim.tbl_extend("force", icon, { color = gray(icon.color) })
+    end
+  end
+  devicons.set_icon(icons)
+  local default = devicons.get_default_icon()
+  devicons.set_default_icon(default.icon, gray(default.color), default.cterm_color)
 end
 
 function M.load(variant)
@@ -318,6 +367,9 @@ function M.load(variant)
     for name, spec in pairs(art.groups) do
       vim.api.nvim_set_hl(0, name, spec)
     end
+  end
+  if variant == "kurosawa" and package.loaded["nvim-web-devicons"] then
+    M.gray_devicons()
   end
   for i, col in ipairs(c.terminal) do
     vim.g["terminal_color_" .. (i - 1)] = col
