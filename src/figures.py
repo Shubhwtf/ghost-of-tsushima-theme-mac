@@ -327,13 +327,18 @@ def pampas(x, base, height, lean, rng):
 def leaf_path(x, y, size, angle, kind="maple"):
     """A small leaf shape centred at x, y in design units."""
     if kind == "maple":
+        # Japanese maple: seven slender pointed lobes, deep notches, a short stem
         pts = []
-        for i in range(10):
-            a = math.pi * 2 * i / 10 - math.pi / 2
-            r = size if i % 2 == 0 else size * 0.42
-            if i in (4, 6):
-                r *= 0.7
-            pts.append((math.cos(a) * r, math.sin(a) * r))
+        lobes = [(-2.3, 0.5), (-1.55, 0.78), (-0.78, 0.95), (0.0, 1.0), (0.78, 0.95), (1.55, 0.78), (2.3, 0.5)]
+        for i, (a, r) in enumerate(lobes):
+            a -= math.pi / 2
+            pts.append((math.cos(a - 0.2) * r * size * 0.45, math.sin(a - 0.2) * r * size * 0.45))
+            pts.append((math.cos(a) * r * size, math.sin(a) * r * size))
+            pts.append((math.cos(a + 0.2) * r * size * 0.45, math.sin(a + 0.2) * r * size * 0.45))
+            if i < len(lobes) - 1:
+                na = (a + lobes[i + 1][0] - math.pi / 2) / 2
+                pts.append((math.cos(na) * size * 0.22, math.sin(na) * size * 0.22))
+        pts += [(size * 0.04, size * 0.12), (size * 0.05, size * 0.55), (-size * 0.02, size * 0.55), (-size * 0.04, size * 0.12)]
         pts = [(px * math.cos(angle) - py * math.sin(angle) + x, px * math.sin(angle) + py * math.cos(angle) + y)
                for px, py in pts]
         return "M" + " L".join(f"{px:.1f},{py:.1f}" for px, py in pts) + "Z"
