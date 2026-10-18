@@ -36,7 +36,8 @@ usage: ./install.sh [options]
                      btop, bat, delta, lazygit and fastfetch themes
   --shell            starship prompt, zsh highlighting, fzf and eza colours
   --nvim             the full Neovim config with the ensō dashboard
-  --desktop          SketchyBar, JankyBorders and macOS appearance (dark mode, red accent)
+  --desktop          SketchyBar, JankyBorders and macOS appearance (dark mode, red
+                     accent; graphite with --variant kurosawa)
   --extras           with --desktop: also tidy the Dock and Finder (see macos/defaults.sh)
   --brew             install the tools with Homebrew (sketchybar, borders, starship, ...)
   --wallpaper NAME   render or fetch a wallpaper and set it as the desktop:
@@ -76,19 +77,30 @@ case "$VARIANT" in
     kurosawa) NAME="Ghost of Tsushima Kurosawa"; SLUG="ghost-of-tsushima-kurosawa"; SFX="-kurosawa" ;;
     *) echo "unknown variant: $VARIANT (use red or kurosawa)" >&2; exit 1 ;;
 esac
+if [[ "$VARIANT" == kurosawa && -n "$off" ]]; then
+    red=$'\e[38;2;245;245;245m'; gold=$'\e[38;2;184;184;184m'; dim=$'\e[38;2;128;128;128m'
+fi
 
 # ------------------------------------------------------------------ helpers
 mkdir -p "$STATE"
 touch "$MANIFEST"
 
-# backup <path>: copy an existing file/dir into the backup, mirroring its path under $HOME
+# ours <path>: true when the installer put this file there (so switching variants may replace it)
+ours() { grep -qxF "$1" "$MANIFEST" 2>/dev/null; }
+
+# backup <path>: copy an existing file/dir into the backup, mirroring its path under $HOME.
+# Files the installer put there itself are skipped, so every backup holds only your own configs.
 backup() {
     local p="$1" rel
     [[ -e "$p" || -L "$p" ]] || return 0
+    ours "$p" && return 0
     rel="${p#"$HOME"/}"
     mkdir -p "$BK/$(dirname "$rel")"
     [[ -e "$BK/$rel" ]] || cp -a "$p" "$BK/$rel"
 }
+
+# created <path>: record a file the installer is about to create, so uninstall removes it again
+created() { [[ -e "$1" ]] || grep -qxF "$1" "$MANIFEST" 2>/dev/null || printf '%s\n' "$1" >> "$MANIFEST"; }
 
 # put <src> <dest>: back up dest, then install src there (files or directories)
 put() {
@@ -97,7 +109,8 @@ put() {
     mkdir -p "$(dirname "$dest")"
     if [[ -d "$src" ]]; then
         if [[ -e "$dest" ]]; then
-            # move the old directory aside (it is already in the backup) instead of deleting it
+            # move the old directory aside (it is already in a backup) instead of deleting it
+            mkdir -p "$BK"
             mv "$dest" "$BK/.replaced-$(basename "$dest")-$$"
         fi
         cp -R "$src" "$dest"
@@ -106,9 +119,6 @@ put() {
     fi
     grep -qxF "$dest" "$MANIFEST" 2>/dev/null || printf '%s\n' "$dest" >> "$MANIFEST"
 }
-
-# ours <path>: true when the installer put this file there (so switching variants may replace it)
-ours() { grep -qxF "$1" "$MANIFEST" 2>/dev/null; }
 
 # put_if_absent <src> <dest>: install only when the user has no file of their own there
 put_if_absent() {
@@ -208,6 +218,7 @@ install_terminal() {
     put "$SRC/terminal/delta/$SLUG.gitconfig" "$CONF/delta/$SLUG.gitconfig"
     if have delta && have git; then
         backup "$HOME/.gitconfig"
+        created "$HOME/.gitconfig"
         if ! git config --global --get-all include.path 2>/dev/null | grep -q "$SLUG.gitconfig"; then
             git config --global --add include.path "$CONF/delta/$SLUG.gitconfig"
         fi
@@ -235,6 +246,7 @@ install_shell() {
     put "$SRC/shell/$SLUG.zsh" "$STATE/$SLUG.zsh"
     local rc="$HOME/.zshrc" line="source \"$STATE/$SLUG.zsh\"  # ghost-of-tsushima"
     backup "$rc"
+    created "$rc"
     touch "$rc"
     if grep -q '^source ".*\.zsh"  # ghost-of-tsushima$' "$rc"; then
         # switching variants: swap the one theme line, keep everything else
@@ -299,7 +311,7 @@ install_desktop() {
     fi
 
     say "macOS appearance"
-    local args=(--backup "$BK")
+    local args=(--variant "$VARIANT" --backup "$BK")
     [[ $EXTRAS -eq 1 ]] && args+=(--extras)
     bash "$SRC/macos/defaults.sh" "${args[@]}"
 }
@@ -323,8 +335,6 @@ install_wallpaper() {
 }
 
 # ------------------------------------------------------------------ run
-if [[ "$VARIANT" == kurosawa ]]; then red=$'\e[38;2;245;245;245m'; gold=$'\e[38;2;184;184;184m'; fi
-[[ ! -t 1 || -n "${NO_COLOR:-}" ]] && { red=""; gold=""; }
 printf '\n%s冥人%s  %sGHOST OF TSUSHIMA%s  %s\n\n' "$red" "$off" "$gold" "$off" "$([[ $VARIANT == kurosawa ]] && echo '· KUROSAWA MODE')"
 [[ $DO_BREW -eq 1 ]] && install_brew
 [[ $DO_TERM -eq 1 ]] && install_terminal

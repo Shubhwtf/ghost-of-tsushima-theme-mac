@@ -5,7 +5,7 @@
 #
 # Works for both variants (red and Kurosawa), and for a mix of them after switching.
 # Moves every file the installer put down into ~/.got-removed-<timestamp>,
-# restores the configs you had before from the oldest ~/.got-backup-*,
+# restores the configs you had before from the ~/.got-backup-* folders,
 # removes the theme's lines from ~/.zshrc and, on macOS, puts the appearance
 # settings back with restore-defaults.sh. Nothing is deleted.
 set -euo pipefail
@@ -19,6 +19,7 @@ KEEP_DEFAULTS=0
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { sed -n '2,10p' "$0"; exit 0; }
 
 red=$'\e[38;2;226;61;67m'; off=$'\e[0m'
+[[ "$(cat "$STATE/variant" 2>/dev/null)" == kurosawa ]] && red=$'\e[38;2;245;245;245m'
 [[ -t 1 ]] || { red=""; off=""; }
 say() { printf '%s◆%s %s\n' "$red" "$off" "$*"; }
 
@@ -31,12 +32,6 @@ stash() {
     mv "$p" "$OUT/$rel"
 }
 
-# the oldest backup holds the configs from before the first install
-FIRST_BK=""
-if [[ -f "$STATE/backups.txt" ]]; then
-    FIRST_BK="$(head -n1 "$STATE/backups.txt")"
-fi
-
 if [[ -f "$MANIFEST" ]]; then
     say "Removing theme files (moved to $OUT)"
     while IFS= read -r p; do
@@ -44,16 +39,23 @@ if [[ -f "$MANIFEST" ]]; then
     done < "$MANIFEST"
 fi
 
-if [[ -n "$FIRST_BK" && -d "$FIRST_BK" ]]; then
-    say "Restoring your previous configs from $FIRST_BK"
-    (cd "$FIRST_BK" && find . -mindepth 1 \( -type f -o -type l \) ! -path './.replaced-*' ! -name 'restore-defaults.sh' -print) |
-    while IFS= read -r f; do
-        f="${f#./}"
-        case "$f" in .replaced-*) continue ;; esac
-        mkdir -p "$HOME/$(dirname "$f")"
-        [[ -e "$HOME/$f" ]] && stash "$HOME/$f"
-        cp -a "$FIRST_BK/$f" "$HOME/$f"
-    done
+# every backup holds only your own configs; when one is in several, the oldest copy wins
+if [[ -f "$STATE/backups.txt" ]]; then
+    restored="$(mktemp)"
+    while IFS= read -r bk; do
+        [[ -n "$bk" && -d "$bk" ]] || continue
+        say "Restoring your previous configs from $bk"
+        (cd "$bk" && find . -mindepth 1 \( -type f -o -type l \) ! -path './.replaced-*' ! -name 'restore-defaults.sh' -print) |
+        while IFS= read -r f; do
+            f="${f#./}"
+            grep -qxF "$f" "$restored" && continue
+            printf '%s\n' "$f" >> "$restored"
+            mkdir -p "$HOME/$(dirname "$f")"
+            [[ -e "$HOME/$f" || -L "$HOME/$f" ]] && stash "$HOME/$f"
+            cp -a "$bk/$f" "$HOME/$f"
+        done
+    done < "$STATE/backups.txt"
+    rm -f "$restored"
 fi
 
 if [[ -f "$HOME/.zshrc" ]] && grep -q '# ghost-of-tsushima' "$HOME/.zshrc"; then
