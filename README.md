@@ -229,19 +229,19 @@ The uninstaller moves the theme's files to `~/.got-removed-<timestamp>`, puts ba
 | ![](https://placehold.co/16x16/1e1b1a/1e1b1a.png) | Ash (surfaces, inactive border) | `#1e1b1a` | |
 | ![](https://placehold.co/16x16/2a2523/2a2523.png) | Stone | `#2a2523` | |
 | ![](https://placehold.co/16x16/3a3330/3a3330.png) | Slate (borders) | `#3a3330` | |
-| ![](https://placehold.co/16x16/837a73/837a73.png) | Smoke (comments) | `#837a73` | 4.4:1 |
+| ![](https://placehold.co/16x16/877e77/877e77.png) | Smoke (comments) | `#877e77` | 4.7:1 |
 | ![](https://placehold.co/16x16/a89f96/a89f96.png) | Mist (dim text) | `#a89f96` | 7.2:1 |
 | ![](https://placehold.co/16x16/ece6dc/ece6dc.png) | Washi paper (text) | `#ece6dc` | 15.0:1 |
 | ![](https://placehold.co/16x16/f6f1e7/f6f1e7.png) | Paper, bright | `#f6f1e7` | 16.6:1 |
 | ![](https://placehold.co/16x16/8e1118/8e1118.png) | Blood (selection, with paper text at 8.3:1) | `#8e1118` | |
 | ![](https://placehold.co/16x16/c1121f/c1121f.png) | Lacquer red (accent, focused border) | `#c1121f` | |
-| ![](https://placehold.co/16x16/e23d43/e23d43.png) | Crimson (keywords, errors) | `#e23d43` | 4.4:1 |
-| ![](https://placehold.co/16x16/e0452b/e0452b.png) | Vermilion (cursor) | `#e0452b` | 4.5:1 |
+| ![](https://placehold.co/16x16/e5444a/e5444a.png) | Crimson (keywords, errors) | `#e5444a` | 4.7:1 |
+| ![](https://placehold.co/16x16/e34a30/e34a30.png) | Vermilion (cursor) | `#e34a30` | 4.7:1 |
 | ![](https://placehold.co/16x16/e8704a/e8704a.png) | Ember (numbers) | `#e8704a` | 6.1:1 |
 | ![](https://placehold.co/16x16/c9a45c/c9a45c.png) | Gold leaf | `#c9a45c` | 8.0:1 |
 | ![](https://placehold.co/16x16/e2c27f/e2c27f.png) | Gold, bright (functions) | `#e2c27f` | 10.9:1 |
 | ![](https://placehold.co/16x16/d8c9a3/d8c9a3.png) | Pampas (parameters) | `#d8c9a3` | 11.4:1 |
-| ![](https://placehold.co/16x16/4f7ca8/4f7ca8.png) | Ai-iro indigo | `#4f7ca8` | 4.2:1 |
+| ![](https://placehold.co/16x16/5784b1/5784b1.png) | Ai-iro indigo | `#5784b1` | 4.7:1 |
 | ![](https://placehold.co/16x16/82a9d1/82a9d1.png) | Sky (types) | `#82a9d1` | 7.6:1 |
 | ![](https://placehold.co/16x16/7a9a5a/7a9a5a.png) | Bamboo | `#7a9a5a` | 5.9:1 |
 | ![](https://placehold.co/16x16/9db97c/9db97c.png) | Moss (strings) | `#9db97c` | 8.6:1 |
