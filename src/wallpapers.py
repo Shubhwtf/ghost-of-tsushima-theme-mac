@@ -444,10 +444,107 @@ def scene_standoff(c, rng):
     c.comp(c.blur(c.svg_mask(near), 6), C["lacquer"], 0.9)
 
 
+# ------------------------------------------------------------------ Kurosawa
+def cedar_row(c, rng, base, h0, h1, n, x0=-100, x1=DW + 100):
+    """Tall Japanese cedars (sugi): a straight trunk and ragged, drooping
+    foliage tiers that widen toward the bottom."""
+    out = []
+    for _ in range(n):
+        x = rng.uniform(x0, x1)
+        h = rng.uniform(h0, h1)
+        w = h * rng.uniform(0.14, 0.22)
+        out.append(f'<rect x="{x - w * 0.035:.0f}" y="{base - h * 0.3:.0f}" width="{w * 0.07:.0f}" height="{h * 0.3:.0f}"/>')
+        tiers = rng.randint(7, 11)
+        for i in range(tiers):
+            t0 = i / tiers
+            t1 = (i + 1.6) / tiers
+            ytop = base - h + h * 0.82 * t0
+            ybot = base - h + h * 0.82 * min(1, t1)
+            ww = w * (0.25 + 0.75 * min(1, t1) ** 0.9) * rng.uniform(0.75, 1.15)
+            sag = (ybot - ytop) * rng.uniform(0.1, 0.3)
+            out.append(f'<path d="M{x:.0f},{ytop:.0f} Q{x + ww * 0.3:.0f},{ytop + (ybot - ytop) * 0.4:.0f} '
+                       f'{x + ww * 0.5:.0f},{ybot + sag:.0f} Q{x + ww * 0.1:.0f},{ybot - sag * 0.3:.0f} {x:.0f},{ybot:.0f} '
+                       f'Q{x - ww * 0.1:.0f},{ybot - sag * 0.3:.0f} {x - ww * 0.5:.0f},{ybot + sag * 0.8:.0f} '
+                       f'Q{x - ww * 0.3:.0f},{ytop + (ybot - ytop) * 0.4:.0f} {x:.0f},{ytop:.0f}Z"/>')
+    return "".join(out)
+
+
+def scene_kurosawa(c, rng):
+    """Black and white, heavy rain, grain. Only the maple leaves and his sash are red."""
+    xs, ys = c.grid()
+    hz = 1500
+    c.img = c.vgrad([(0, "#5d5a57"), (0.45, "#8f8b86"), (0.68, "#b3aea7"), (0.70, "#9a958f"), (1, "#3b3836")])
+    sky = c.noise(3, 6, 401, stretch=2.5)
+    c.multiply((ys < hz) * smoothstep(0.35, 0.8, sky), "#55524f", 0.55)
+    # cedar forest in three rain-hazed depths
+    for i, (base, h0, h1, n, col, op) in enumerate([(hz + 10, 380, 620, 70, "#7d7974", 0.8),
+                                                    (hz + 20, 520, 860, 40, "#5a5652", 0.9),
+                                                    (hz + 30, 700, 1150, 18, "#33302e", 0.95)]):
+        m = c.svg_mask(cedar_row(c, rng, base, h0, h1, n))
+        c.comp(c.blur(m, 6 - 2 * i), col, op)
+        c.comp(np.exp(-((ys - (hz - 60)) / 260) ** 2) * (0.4 + 0.6 * c.noise(5, 4, 402 + i, stretch=4)), "#a8a39d", 0.45)
+    # wet ground: dark mud with sky-bright puddles
+    gnd = below(c, lambda X: hz + 0 * np.asarray(X), 2)
+    c.img = c.img * (1 - gnd[..., None]) + c.vgrad([(0, "#000000"), (0.69, "#6a6662"), (1, "#151413")]) * gnd[..., None]
+    c.comp(np.exp(-((ys - hz) / 70) ** 2), "#8f8a84", 0.8)
+    pud = smoothstep(0.52, 0.6, c.noise(6, 6, 403, stretch=4.0)) * gnd
+    c.comp(pud, "#9d9893", 0.75)
+    # the samurai
+    fig = F.samurai_stand(1560, 1940, 1240, wind=0.6, sash_len=1.25, seed=41, cape=False)
+    fm = c.svg_mask(fig.svg())
+    sash = c.svg_mask(fig.svg(tags=["sash"]))
+    # reflection in the puddles
+    feet = int(1940 * c.k)
+    refl = np.zeros_like(fm)
+    span = min(feet, c.h - feet)
+    refl[feet:feet + span] = fm[feet - 1:feet - 1 - span:-1] if span > 0 else 0
+    rs = np.zeros_like(sash)
+    rs[feet:feet + span] = sash[feet - 1:feet - 1 - span:-1]
+    ripple = 1 - 0.5 * smoothstep(0.4, 0.7, c.noise(60, 3, 404, stretch=8))
+    c.comp(c.blur(refl, 4) * pud * ripple, "#1a1918", 0.85)
+    c.comp(c.blur(rs, 4) * pud * ripple, C["blood"], 0.85)
+    c.comp(c.blur(fm, 6), "#000000", 0.3)
+    c.comp(fm, "#0e0d0d")
+    c.comp(sash, C["lacquer"])
+    # falling maple leaves (the only colour besides the sash)
+    leaves = "".join(f'<path d="{F.leaf_path(rng.uniform(0, DW), rng.uniform(100, 1900), rng.uniform(24, 46), rng.uniform(0, 6.28), "maple")}"/>' for _ in range(34))
+    c.comp(c.svg_mask(leaves), C["lacquer"])
+    ground_leaves = "".join(f'<path d="{F.leaf_path(rng.uniform(0, DW), rng.uniform(1750, 2140), rng.uniform(30, 50), rng.uniform(0, 6.28), "maple")}"/>' for _ in range(16))
+    c.comp(c.svg_mask(ground_leaves), C["blood"])
+    # rain: fine far streaks, heavy near streaks, splashes
+    ang = math.radians(78)
+    far, near = [], []
+    for _ in range(7000):
+        x, y = rng.uniform(-300, DW + 100), rng.uniform(-100, DH)
+        L = rng.uniform(40, 140)
+        far.append(f'<line x1="{x:.0f}" y1="{y:.0f}" x2="{x + math.cos(ang) * L:.0f}" y2="{y + math.sin(ang) * L:.0f}"/>')
+    for _ in range(420):
+        x, y = rng.uniform(-300, DW + 100), rng.uniform(-200, DH)
+        L = rng.uniform(220, 520)
+        near.append(f'<line x1="{x:.0f}" y1="{y:.0f}" x2="{x + math.cos(ang) * L:.0f}" y2="{y + math.sin(ang) * L:.0f}"/>')
+    c.screen(c.svg_mask(f'<g stroke="#fff" stroke-width="1.6" stroke-linecap="round">{"".join(far)}</g>'), "#e8e4de", 0.32)
+    c.screen(c.blur(c.svg_mask(f'<g stroke="#fff" stroke-width="3.5" stroke-linecap="round">{"".join(near)}</g>'), 2.5), "#f2eee8", 0.4)
+    spl = []
+    for _ in range(380):
+        t = rng.random() ** 1.5
+        y = hz + 20 + t * (DH - hz)
+        x = rng.uniform(0, DW)
+        r = 3 + t * 16
+        spl.append(f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="{r:.1f}" ry="{r * 0.28:.1f}" fill="none" stroke="#fff" stroke-width="{1 + t * 2:.1f}"/>')
+    c.screen(c.blur(c.svg_mask("".join(spl)), 1.2), "#d8d4ce", 0.28)
+    # rain haze and a cold contrast curve, keeping the reds
+    c.screen(c.noise(4, 5, 405, stretch=1.5) * 0.25, "#ffffff", 0.3)
+    g = c.img.mean(axis=2, keepdims=True)
+    red = np.clip((c.img[..., :1] - c.img[..., 1:2]) * 3, 0, 1)
+    bw = np.clip((g - 0.5) * 1.18 + 0.5, 0, 1) * np.array([1.0, 0.99, 0.97], np.float32)
+    c.img = bw * (1 - red) + c.img * red
+
+
 SCENES = {
     "Higanbana": ("Higanbana", scene_higanbana, 0.03, 0.45),
     "ToriiAtDawn": ("Torii at Dawn", scene_torii, 0.022, 0.25),
     "Standoff": ("Standoff", scene_standoff, 0.03, 0.5),
+    "Kurosawa": ("Kurosawa", scene_kurosawa, 0.06, 0.6),
 }
 
 
