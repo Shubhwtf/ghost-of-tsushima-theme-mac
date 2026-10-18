@@ -14,8 +14,7 @@ BK="$HOME/.got-backup-$STAMP"
 STATE="$CONF/ghost-of-tsushima"
 MANIFEST="$STATE/installed.txt"
 OS="$(uname -s)"
-NAME="Ghost of Tsushima"
-SLUG="ghost-of-tsushima"
+VARIANT="red"
 
 red=$'\e[38;2;226;61;67m'; gold=$'\e[38;2;201;164;92m'; dim=$'\e[38;2;131;122;115m'; off=$'\e[0m'
 if [[ ! -t 1 || -n "${NO_COLOR:-}" ]]; then red=""; gold=""; dim=""; off=""; fi
@@ -30,6 +29,8 @@ ${red}冥人${off} ${gold}GHOST OF TSUSHIMA${off} for macOS
 
 usage: ./install.sh [options]
 
+  --variant V        red (default) or kurosawa, the black-and-white mode; re-run with
+                     the other one to switch (your backups are kept)
   --all              terminals, shell, Neovim and the desktop layer
   --terminal         Terminal.app, iTerm2, Ghostty, kitty, Alacritty, WezTerm,
                      btop, bat, delta, lazygit and fastfetch themes
@@ -47,6 +48,7 @@ usage: ./install.sh [options]
 examples:
   ./install.sh --brew --all --wallpaper Higanbana
   ./install.sh --terminal --shell
+  ./install.sh --variant kurosawa --all --wallpaper Kurosawa
 EOF
 }
 
@@ -60,6 +62,7 @@ while [[ $# -gt 0 ]]; do
         --nvim) DO_NVIM=1 ;;
         --desktop) DO_DESK=1 ;;
         --extras) EXTRAS=1 ;;
+        --variant) [[ $# -ge 2 ]] || { echo "--variant needs red or kurosawa" >&2; exit 1; }; VARIANT="$2"; shift ;;
         --brew) DO_BREW=1 ;;
         --wallpaper) [[ $# -ge 2 ]] || { echo "--wallpaper needs a name" >&2; exit 1; }; WALL="$2"; shift ;;
         -h|--help) usage; exit 0 ;;
@@ -67,6 +70,12 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
+
+case "$VARIANT" in
+    red) NAME="Ghost of Tsushima"; SLUG="ghost-of-tsushima"; SFX="" ;;
+    kurosawa) NAME="Ghost of Tsushima Kurosawa"; SLUG="ghost-of-tsushima-kurosawa"; SFX="-kurosawa" ;;
+    *) echo "unknown variant: $VARIANT (use red or kurosawa)" >&2; exit 1 ;;
+esac
 
 # ------------------------------------------------------------------ helpers
 mkdir -p "$STATE"
@@ -98,9 +107,12 @@ put() {
     grep -qxF "$dest" "$MANIFEST" 2>/dev/null || printf '%s\n' "$dest" >> "$MANIFEST"
 }
 
-# put_if_absent <src> <dest>: install only when the user has no file there yet
+# ours <path>: true when the installer put this file there (so switching variants may replace it)
+ours() { grep -qxF "$1" "$MANIFEST" 2>/dev/null; }
+
+# put_if_absent <src> <dest>: install only when the user has no file of their own there
 put_if_absent() {
-    if [[ -e "$2" ]]; then
+    if [[ -e "$2" ]] && ! ours "$2"; then
         note "kept your $(basename "$2"); theme file installed next to it"
         return 1
     fi
@@ -160,22 +172,22 @@ install_terminal() {
 
     say "Ghostty"
     put "$SRC/terminal/ghostty/$SLUG" "$CONF/ghostty/themes/$SLUG"
-    put "$SRC/dotfiles/ghostty/config" "$CONF/ghostty/config"
+    put "$SRC/dotfiles/ghostty/config$SFX" "$CONF/ghostty/config"
 
     say "kitty"
     put "$SRC/terminal/kitty/$SLUG.conf" "$CONF/kitty/themes/$SLUG.conf"
-    put "$SRC/dotfiles/kitty/kitty.conf" "$CONF/kitty/kitty.conf"
+    put "$SRC/dotfiles/kitty/kitty$SFX.conf" "$CONF/kitty/kitty.conf"
     pkill -USR1 -x kitty 2>/dev/null || true
 
     say "Alacritty"
     put "$SRC/terminal/alacritty/$SLUG.toml" "$CONF/alacritty/themes/$SLUG.toml"
-    put_if_absent "$SRC/terminal/alacritty/alacritty.toml" "$CONF/alacritty/alacritty.toml" ||
+    put_if_absent "$SRC/terminal/alacritty/alacritty$SFX.toml" "$CONF/alacritty/alacritty.toml" ||
         note "add to alacritty.toml:  [general] import = [\"~/.config/alacritty/themes/$SLUG.toml\"]"
 
     say "WezTerm"
-    put "$SRC/terminal/wezterm/wezterm.lua" "$CONF/wezterm/$SLUG.lua"
-    if [[ ! -e "$CONF/wezterm/wezterm.lua" && ! -e "$HOME/.wezterm.lua" ]]; then
-        put "$SRC/terminal/wezterm/wezterm.lua" "$CONF/wezterm/wezterm.lua"
+    put "$SRC/terminal/wezterm/wezterm$SFX.lua" "$CONF/wezterm/$SLUG.lua"
+    if { [[ ! -e "$CONF/wezterm/wezterm.lua" ]] || ours "$CONF/wezterm/wezterm.lua"; } && [[ ! -e "$HOME/.wezterm.lua" ]]; then
+        put "$SRC/terminal/wezterm/wezterm$SFX.lua" "$CONF/wezterm/wezterm.lua"
     else
         note "your wezterm config is untouched; the full theme config is in $CONF/wezterm/$SLUG.lua"
     fi
@@ -206,25 +218,33 @@ install_terminal() {
     say "lazygit"
     local lg="$CONF/lazygit"
     is_mac && lg="$HOME/Library/Application Support/lazygit"
-    put_if_absent "$SRC/terminal/lazygit/config.yml" "$lg/config.yml" ||
-        put "$SRC/terminal/lazygit/config.yml" "$lg/$SLUG.yml"
+    put_if_absent "$SRC/terminal/lazygit/config$SFX.yml" "$lg/config.yml" ||
+        put "$SRC/terminal/lazygit/config$SFX.yml" "$lg/$SLUG.yml"
 
     say "fastfetch"
-    put "$SRC/terminal/fastfetch/config.jsonc" "$CONF/fastfetch/config.jsonc"
-    put "$SRC/terminal/fastfetch/ghost.ansi" "$CONF/fastfetch/ghost.ansi"
+    put "$SRC/terminal/fastfetch/config$SFX.jsonc" "$CONF/fastfetch/config.jsonc"
+    put "$SRC/terminal/fastfetch/ghost$SFX.ansi" "$CONF/fastfetch/ghost$SFX.ansi"
 }
 
 # ------------------------------------------------------------------ shell
 install_shell() {
     say "starship prompt"
-    put "$SRC/shell/starship.toml" "$CONF/starship.toml"
+    put "$SRC/shell/starship$SFX.toml" "$CONF/starship.toml"
 
     say "zsh colours (syntax highlighting, autosuggestions, fzf, eza, bat)"
     put "$SRC/shell/$SLUG.zsh" "$STATE/$SLUG.zsh"
     local rc="$HOME/.zshrc" line="source \"$STATE/$SLUG.zsh\"  # ghost-of-tsushima"
     backup "$rc"
     touch "$rc"
-    if ! grep -q '# ghost-of-tsushima' "$rc"; then
+    if grep -q '^source ".*\.zsh"  # ghost-of-tsushima$' "$rc"; then
+        # switching variants: swap the one theme line, keep everything else
+        local tmp
+        tmp="$(mktemp)"
+        awk -v l="$line" '/^source ".*\.zsh"  # ghost-of-tsushima$/ { print l; next } { print }' "$rc" > "$tmp"
+        cat "$tmp" > "$rc"
+        rm -f "$tmp"
+        note "your .zshrc now sources the $VARIANT theme"
+    elif ! grep -q '# ghost-of-tsushima' "$rc"; then
         if is_mac && have brew; then
             local bp
             bp="$(brew --prefix)"
@@ -237,7 +257,7 @@ install_shell() {
         printf '%s\n' "$line" >> "$rc"
         note "added one source line to ~/.zshrc (open a new shell to see it)"
     else
-        note "your .zshrc already sources the theme"
+        printf '%s\n' "$line" >> "$rc"
     fi
 }
 
@@ -245,6 +265,12 @@ install_shell() {
 install_nvim() {
     say "Neovim config"
     put "$SRC/dotfiles/nvim" "$CONF/nvim"
+    local init="$CONF/nvim/init.lua" tmp
+    tmp="$(mktemp)"
+    awk -v v="$VARIANT" '/^vim.g.got_variant = / { print "vim.g.got_variant = vim.g.got_variant or \"" v "\""; next } { print }' "$init" > "$tmp"
+    cat "$tmp" > "$init"
+    rm -f "$tmp"
+    note "colorscheme: $SLUG"
     have tree-sitter || note "install the tree-sitter CLI so nvim-treesitter can build parsers (brew install tree-sitter)"
     note "open nvim once; lazy.nvim installs the plugins"
 }
@@ -254,7 +280,9 @@ install_desktop() {
     if ! is_mac; then note "skipping SketchyBar, borders and macOS defaults (macOS only)"; return; fi
     say "SketchyBar"
     put "$SRC/sketchybar" "$CONF/sketchybar"
-    chmod +x "$CONF/sketchybar/sketchybarrc" "$CONF/sketchybar/plugins/"*.sh
+    cp "$SRC/sketchybar/colors$SFX.sh" "$CONF/sketchybar/colors.sh"
+    cp "$SRC/sketchybar/icons/enso$SFX.png" "$CONF/sketchybar/icons/enso.png"
+    chmod +x "$CONF/sketchybar/sketchybarrc" "$CONF/sketchybar/colors.sh" "$CONF/sketchybar/plugins/"*.sh
     if have brew && have sketchybar; then
         brew services restart sketchybar >/dev/null 2>&1 || sketchybar --reload || true
     else
@@ -262,7 +290,7 @@ install_desktop() {
     fi
 
     say "JankyBorders"
-    put "$SRC/borders/bordersrc" "$CONF/borders/bordersrc"
+    put "$SRC/borders/bordersrc$SFX" "$CONF/borders/bordersrc"
     chmod +x "$CONF/borders/bordersrc"
     if have brew && have borders; then
         brew services restart borders >/dev/null 2>&1 || true
@@ -281,8 +309,8 @@ install_wallpaper() {
     local name="$1" picker="$SRC/scripts/wallpapers.py"
     have python3 || { say "--wallpaper needs python3"; return; }
     case "$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')" in
-        higanbana|toriiatdawn|standoff|kurosawa|guidingwind|guidingwindpaper)
-            python3 "$picker" --originals "$name" --set-first ;;
+        higanbana|toriiatdawn|standoff|kurosawa|guidingwind|guidingwindpaper|*-bw)
+            python3 "$picker" --variant "$VARIANT" --originals "$name" --set-first ;;
         *)
             if [[ -f "$name" ]]; then
                 python3 "$picker" --set "$name"
@@ -295,7 +323,9 @@ install_wallpaper() {
 }
 
 # ------------------------------------------------------------------ run
-printf '\n%s冥人%s  %sGHOST OF TSUSHIMA%s\n\n' "$red" "$off" "$gold" "$off"
+if [[ "$VARIANT" == kurosawa ]]; then red=$'\e[38;2;245;245;245m'; gold=$'\e[38;2;184;184;184m'; fi
+[[ ! -t 1 || -n "${NO_COLOR:-}" ]] && { red=""; gold=""; }
+printf '\n%s冥人%s  %sGHOST OF TSUSHIMA%s  %s\n\n' "$red" "$off" "$gold" "$off" "$([[ $VARIANT == kurosawa ]] && echo '· KUROSAWA MODE')"
 [[ $DO_BREW -eq 1 ]] && install_brew
 [[ $DO_TERM -eq 1 ]] && install_terminal
 [[ $DO_SHELL -eq 1 ]] && install_shell
@@ -303,6 +333,7 @@ printf '\n%s冥人%s  %sGHOST OF TSUSHIMA%s\n\n' "$red" "$off" "$gold" "$off"
 [[ $DO_DESK -eq 1 ]] && install_desktop
 [[ -n "$WALL" ]] && install_wallpaper "$WALL"
 
+printf '%s\n' "$VARIANT" > "$STATE/variant"
 if [[ -d "$BK" ]]; then
     printf '%s\n' "$BK" >> "$STATE/backups.txt"
     say "Your previous configs are in $BK"
