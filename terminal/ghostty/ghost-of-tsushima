@@ -1,14 +1,14 @@
 # Ghost of Tsushima — generated from palette.json by src/terminals.py
 palette = 0=#1e1b1a
-palette = 1=#e23d43
+palette = 1=#e5444a
 palette = 2=#7a9a5a
 palette = 3=#c9a45c
-palette = 4=#4f7ca8
+palette = 4=#5784b1
 palette = 5=#c97a8d
 palette = 6=#5f9c94
 palette = 7=#c9c1b5
-palette = 8=#837a73
-palette = 9=#e0452b
+palette = 8=#877e77
+palette = 9=#e34a30
 palette = 10=#9db97c
 palette = 11=#e2c27f
 palette = 12=#82a9d1
@@ -17,7 +17,7 @@ palette = 14=#86c2b9
 palette = 15=#f6f1e7
 background = #141212
 foreground = #ece6dc
-cursor-color = #e0452b
+cursor-color = #e34a30
 cursor-text = #0b0a0a
 selection-background = #8e1118
 selection-foreground = #f6f1e7

@@ -1,0 +1,40 @@
+# Ghost of Tsushima Kurosawa — generated from palette.json by src/terminals.py
+# Add to ~/.gitconfig:
+#   [include]
+#       path = ~/.config/delta/ghost-of-tsushima-kurosawa.gitconfig
+#   [delta]
+#       features = ghost-of-tsushima-kurosawa
+[delta "ghost-of-tsushima-kurosawa"]
+    dark = true
+    syntax-theme = Ghost of Tsushima Kurosawa
+    line-numbers = true
+    side-by-side = false
+    navigate = true
+    file-style = "#f5f5f5" bold
+    file-decoration-style = "#e4e4e4" ul
+    file-added-label = [+]
+    file-removed-label = [-]
+    file-modified-label = [~]
+    hunk-header-style = file line-number syntax
+    hunk-header-decoration-style = "#3a3a3a" box
+    hunk-header-file-style = "#b8b8b8"
+    hunk-header-line-number-style = "#b0b0b0"
+    minus-style = syntax "#0b0b0b"
+    minus-emph-style = "#808080" "#000000" strike
+    minus-non-emph-style = syntax "#0b0b0b"
+    plus-style = syntax "#2a2a2a"
+    plus-emph-style = "#f5f5f5" "#474747" bold ul
+    plus-non-emph-style = syntax "#2a2a2a"
+    zero-style = syntax
+    line-numbers-minus-style = "#808080" strike
+    line-numbers-plus-style = "#f5f5f5" bold
+    line-numbers-zero-style = "#3a3a3a"
+    line-numbers-left-style = "#262626"
+    line-numbers-right-style = "#262626"
+    commit-decoration-style = "#b8b8b8" box
+    commit-style = "#b8b8b8" bold
+    blame-palette = "#121212 #1c1c1c #262626"
+    merge-conflict-begin-symbol = ▼
+    merge-conflict-end-symbol = ▲
+    merge-conflict-ours-diff-header-style = "#b8b8b8" bold
+    merge-conflict-theirs-diff-header-style = "#b0b0b0" bold

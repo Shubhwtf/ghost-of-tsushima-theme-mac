@@ -11,7 +11,7 @@ bright_foreground = "#f6f1e7"
 
 [colors.cursor]
 text = "#0b0a0a"
-cursor = "#e0452b"
+cursor = "#e34a30"
 
 [colors.vi_mode_cursor]
 text = "#0b0a0a"
@@ -43,17 +43,17 @@ background = "#1e1b1a"
 
 [colors.normal]
 black = "#1e1b1a"
-red = "#e23d43"
+red = "#e5444a"
 green = "#7a9a5a"
 yellow = "#c9a45c"
-blue = "#4f7ca8"
+blue = "#5784b1"
 magenta = "#c97a8d"
 cyan = "#5f9c94"
 white = "#c9c1b5"
 
 [colors.bright]
-black = "#837a73"
-red = "#e0452b"
+black = "#877e77"
+red = "#e34a30"
 green = "#9db97c"
 yellow = "#e2c27f"
 blue = "#82a9d1"

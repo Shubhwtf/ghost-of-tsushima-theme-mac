@@ -1,0 +1,62 @@
+# Ghost of Tsushima Kurosawa — generated from palette.json by src/terminals.py
+# Import it from alacritty.toml:
+#   [general]
+#   import = ["~/.config/alacritty/themes/ghost-of-tsushima-kurosawa.toml"]
+
+[colors.primary]
+background = "#121212"
+foreground = "#e4e4e4"
+dim_foreground = "#a6a6a6"
+bright_foreground = "#f5f5f5"
+
+[colors.cursor]
+text = "#0a0a0a"
+cursor = "#fafafa"
+
+[colors.vi_mode_cursor]
+text = "#0a0a0a"
+cursor = "#b8b8b8"
+
+[colors.selection]
+text = "#f5f5f5"
+background = "#404040"
+
+[colors.search.matches]
+foreground = "#0a0a0a"
+background = "#b8b8b8"
+
+[colors.search.focused_match]
+foreground = "#f5f5f5"
+background = "#5e5e5e"
+
+[colors.hints.start]
+foreground = "#0a0a0a"
+background = "#b8b8b8"
+
+[colors.hints.end]
+foreground = "#0a0a0a"
+background = "#c8c8c8"
+
+[colors.footer_bar]
+foreground = "#e4e4e4"
+background = "#1c1c1c"
+
+[colors.normal]
+black = "#1f1f1f"
+red = "#f5f5f5"
+green = "#8f8f8f"
+yellow = "#c4c4c4"
+blue = "#7f7f7f"
+magenta = "#a0a0a0"
+cyan = "#b2b2b2"
+white = "#d6d6d6"
+
+[colors.bright]
+black = "#6a6a6a"
+red = "#ffffff"
+green = "#a8a8a8"
+yellow = "#dadada"
+blue = "#9a9a9a"
+magenta = "#bababa"
+cyan = "#cacaca"
+white = "#ebebeb"

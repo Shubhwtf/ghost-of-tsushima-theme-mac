@@ -26,7 +26,7 @@
     plus-emph-style = syntax "#2c4a2a"
     plus-non-emph-style = syntax "#18221a"
     zero-style = syntax
-    line-numbers-minus-style = "#e23d43"
+    line-numbers-minus-style = "#e5444a"
     line-numbers-plus-style = "#9db97c"
     line-numbers-zero-style = "#3a3330"
     line-numbers-left-style = "#2a2523"

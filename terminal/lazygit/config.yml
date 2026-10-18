@@ -5,7 +5,7 @@ gui:
   border: rounded
   theme:
     activeBorderColor:
-      - "#e0452b"
+      - "#e34a30"
       - bold
     inactiveBorderColor:
       - "#3a3330"
@@ -27,11 +27,11 @@ gui:
     markedBaseCommitBgColor:
       - "#82a9d1"
     unstagedChangesColor:
-      - "#e23d43"
+      - "#e5444a"
     defaultFgColor:
       - "#ece6dc"
   authorColors:
     "*": "#c9a45c"
   branchColors:
-    main: "#e23d43"
-    master: "#e23d43"
+    main: "#e5444a"
+    master: "#e5444a"

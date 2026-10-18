@@ -1,0 +1,24 @@
+# Ghost of Tsushima Kurosawa — generated from palette.json by src/terminals.py
+palette = 0=#1f1f1f
+palette = 1=#f5f5f5
+palette = 2=#8f8f8f
+palette = 3=#c4c4c4
+palette = 4=#7f7f7f
+palette = 5=#a0a0a0
+palette = 6=#b2b2b2
+palette = 7=#d6d6d6
+palette = 8=#6a6a6a
+palette = 9=#ffffff
+palette = 10=#a8a8a8
+palette = 11=#dadada
+palette = 12=#9a9a9a
+palette = 13=#bababa
+palette = 14=#cacaca
+palette = 15=#ebebeb
+background = #121212
+foreground = #e4e4e4
+cursor-color = #fafafa
+cursor-text = #0a0a0a
+selection-background = #404040
+selection-foreground = #f5f5f5
+split-divider-color = #3a3a3a

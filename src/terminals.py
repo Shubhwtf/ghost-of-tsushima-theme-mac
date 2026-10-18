@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate every terminal theme from palette.json.
 
-usage: terminals.py [ROOT]   (writes into ROOT/terminal/...)
+usage: [GOT_VARIANT=kurosawa] terminals.py [ROOT]   (writes into ROOT/terminal/...)
 """
 import json
 import os
@@ -10,7 +10,7 @@ import sys
 import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from palette import ANSI, C, NAME, ROLE, SLUG, rgb, rgbf  # noqa: E402
+from palette import ANSI, C, MONO, NAME, ROLE, SLUG, SUFFIX, rgbf  # noqa: E402
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 T = os.path.join(ROOT, "terminal")
@@ -141,7 +141,7 @@ def iterm():
     p1 = write(f"iterm2/{NAME}.itermcolors", plistlib.dumps(cols, fmt=plistlib.FMT_XML), "wb")
     profile = {
         "Name": NAME,
-        "Guid": str(uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/Shubhwtf/ghost-of-tsushima-theme-mac")).upper(),
+        "Guid": str(uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/Shubhwtf/ghost-of-tsushima-theme-mac/" + SLUG)).upper(),
         "Badge Text": "",
         "Normal Font": "JetBrainsMonoNFM-Regular 14",
         "Non Ascii Font": "JetBrainsMonoNFM-Regular 14",
@@ -165,10 +165,10 @@ def iterm():
         "Right Option Key Sends": 2,
         "Silence Bell": True,
         "Minimum Contrast": 0.0,
-        "Tags": ["ghost-of-tsushima"],
+        "Tags": [SLUG],
     }
     profile.update(cols)
-    p2 = write("iterm2/ghost-of-tsushima.json", json.dumps({"Profiles": [profile]}, indent=2) + "\n")
+    p2 = write(f"iterm2/{SLUG}.json", json.dumps({"Profiles": [profile]}, indent=2) + "\n")
     return p1, p2
 
 
@@ -197,7 +197,7 @@ cursor                {CUR}
 cursor_text_color     {CUR_TXT}
 cursor_trail_color    {C['lacquer']}
 
-active_border_color   {C['lacquer']}
+active_border_color   {ROLE['focus']}
 inactive_border_color {C['slate']}
 bell_border_color     {C['gold']}
 visual_bell_color     {C['blood']}
@@ -308,7 +308,7 @@ history = 10000
 [selection]
 save_to_clipboard = true
 """
-    write("alacritty/alacritty.toml", cfg)
+    write(f"alacritty/alacritty{SUFFIX}.toml", cfg)
     return p
 
 
@@ -364,7 +364,7 @@ config.initial_rows = 34
 
 return config
 """
-    return write(f"wezterm/wezterm.lua", t)
+    return write(f"wezterm/wezterm{SUFFIX}.lua", t)
 
 
 # ------------------------------------------------------------------ btop
@@ -381,19 +381,19 @@ theme[graph_text]="{C['mist']}"
 theme[meter_bg]="{C['stone']}"
 theme[proc_misc]="{C['gold']}"
 
-theme[cpu_box]="{C['lacquer']}"
+theme[cpu_box]="{ROLE['focus']}"
 theme[mem_box]="{C['gold']}"
 theme[net_box]="{C['indigo']}"
 theme[proc_box]="{C['slate']}"
 theme[div_line]="{C['stone']}"
 
-theme[temp_start]="{C['pampas']}"
-theme[temp_mid]="{C['vermilion']}"
-theme[temp_end]="{C['lacquer']}"
+theme[temp_start]="{ROLE['grad_start']}"
+theme[temp_mid]="{ROLE['grad_mid']}"
+theme[temp_end]="{ROLE['grad_end']}"
 
-theme[cpu_start]="{C['pampas']}"
-theme[cpu_mid]="{C['vermilion']}"
-theme[cpu_end]="{C['lacquer']}"
+theme[cpu_start]="{ROLE['grad_start']}"
+theme[cpu_mid]="{ROLE['grad_mid']}"
+theme[cpu_end]="{ROLE['grad_end']}"
 
 theme[free_start]="{C['stone']}"
 theme[free_mid]="{C['patina']}"
@@ -407,9 +407,9 @@ theme[available_start]="{C['stone']}"
 theme[available_mid]="{C['gold']}"
 theme[available_end]="{C['gold_hi']}"
 
-theme[used_start]="{C['blood']}"
-theme[used_mid]="{C['lacquer']}"
-theme[used_end]="{C['vermilion']}"
+theme[used_start]="{ROLE['grad_start']}"
+theme[used_mid]="{ROLE['grad_mid']}"
+theme[used_end]="{ROLE['grad_end']}"
 
 theme[download_start]="{C['stone']}"
 theme[download_mid]="{C['indigo']}"
@@ -419,9 +419,9 @@ theme[upload_start]="{C['stone']}"
 theme[upload_mid]="{C['lacquer']}"
 theme[upload_end]="{C['vermilion']}"
 
-theme[process_start]="{C['pampas']}"
-theme[process_mid]="{C['vermilion']}"
-theme[process_end]="{C['lacquer']}"
+theme[process_start]="{ROLE['grad_start']}"
+theme[process_mid]="{ROLE['grad_mid']}"
+theme[process_end]="{ROLE['grad_end']}"
 """
     return write(f"btop/{SLUG}.theme", t)
 
@@ -447,12 +447,12 @@ def tmtheme():
         s("String", "string, string.quoted", C["moss"]),
         s("Escape", "constant.character.escape, string.regexp", C["jade"]),
         s("Number", "constant.numeric", C["ember"]),
-        s("Constant", "constant, constant.language, support.constant", C["ember"]),
-        s("Keyword", "keyword, storage.modifier, keyword.control", C["crimson"]),
+        s("Constant", "constant, constant.language, support.constant", C["ember"], "bold" if MONO else None),
+        s("Keyword", "keyword, storage.modifier, keyword.control", C["crimson"], "bold" if MONO else None),
         s("Operator", "keyword.operator", C["mist"]),
         s("Storage", "storage.type", C["crimson"], "italic"),
         s("Function", "entity.name.function, support.function, meta.function-call", C["gold_hi"]),
-        s("Class", "entity.name.type, entity.name.class, support.type, support.class", C["sky"]),
+        s("Class", "entity.name.type, entity.name.class, support.type, support.class", C["sky"], "italic" if MONO else None),
         s("Inherited", "entity.other.inherited-class", C["sky"], "italic"),
         s("Variable", "variable, variable.other", FG),
         s("Parameter", "variable.parameter", C["pampas"], "italic"),
@@ -469,11 +469,11 @@ def tmtheme():
         s("Code", "markup.raw, markup.inline.raw", C["jade"]),
         s("Quote", "markup.quote", C["mist"], "italic"),
         s("List", "markup.list punctuation.definition.list", C["gold"]),
-        s("Inserted", "markup.inserted", C["moss"]),
-        s("Deleted", "markup.deleted", C["crimson"]),
+        s("Inserted", "markup.inserted", C["paper_hi"] if MONO else C["moss"], "bold" if MONO else None),
+        s("Deleted", "markup.deleted", C["smoke"] if MONO else C["crimson"], "strikethrough" if MONO else None),
         s("Changed", "markup.changed", C["gold"]),
         s("Diff header", "meta.diff.header, meta.diff.range", C["sky"]),
-        s("Invalid", "invalid", C["paper_hi"], None, C["blood"]),
+        s("Invalid", "invalid", C["paper_hi"], "underline" if MONO else None, C["blood"]),
         s("JSON key", "support.type.property-name, meta.mapping.key string", C["gold"]),
     ]
     theme = {"name": NAME, "author": "Shubhwtf", "uuid": str(uuid.uuid5(uuid.NAMESPACE_DNS, SLUG + ".tmTheme")),
@@ -482,6 +482,28 @@ def tmtheme():
 
 
 def delta():
+    if MONO:   # no hue: deleted lines sink darker and strike through, added lines rise brighter and bold
+        diff = f"""    minus-style = syntax "{C['diff_delete']}"
+    minus-emph-style = "{C['smoke']}" "{C['diff_delete_emph']}" strike
+    minus-non-emph-style = syntax "{C['diff_delete']}"
+    plus-style = syntax "{C['diff_add']}"
+    plus-emph-style = "{C['paper_hi']}" "{C['diff_add_emph']}" bold ul
+    plus-non-emph-style = syntax "{C['diff_add']}"
+    zero-style = syntax
+    line-numbers-minus-style = "{C['smoke']}" strike
+    line-numbers-plus-style = "{C['paper_hi']}" bold
+    line-numbers-zero-style = "{C['slate']}""" + '"'
+    else:
+        diff = f"""    minus-style = syntax "{C['diff_delete']}"
+    minus-emph-style = syntax "{C['diff_delete_emph']}"
+    minus-non-emph-style = syntax "{C['diff_delete']}"
+    plus-style = syntax "{C['diff_add']}"
+    plus-emph-style = syntax "{C['diff_add_emph']}"
+    plus-non-emph-style = syntax "{C['diff_add']}"
+    zero-style = syntax
+    line-numbers-minus-style = "{C['crimson']}"
+    line-numbers-plus-style = "{C['moss']}"
+    line-numbers-zero-style = "{C['slate']}""" + '"'
     t = f"""# {HEADER}
 # Add to ~/.gitconfig:
 #   [include]
@@ -495,7 +517,7 @@ def delta():
     side-by-side = false
     navigate = true
     file-style = "{C['paper_hi']}" bold
-    file-decoration-style = "{C['lacquer']}" ul
+    file-decoration-style = "{ROLE['focus']}" ul
     file-added-label = [+]
     file-removed-label = [-]
     file-modified-label = [~]
@@ -503,16 +525,7 @@ def delta():
     hunk-header-decoration-style = "{C['slate']}" box
     hunk-header-file-style = "{C['gold']}"
     hunk-header-line-number-style = "{C['sky']}"
-    minus-style = syntax "#2a1214"
-    minus-emph-style = syntax "#5c161c"
-    minus-non-emph-style = syntax "#2a1214"
-    plus-style = syntax "#18221a"
-    plus-emph-style = syntax "#2c4a2a"
-    plus-non-emph-style = syntax "#18221a"
-    zero-style = syntax
-    line-numbers-minus-style = "{C['crimson']}"
-    line-numbers-plus-style = "{C['moss']}"
-    line-numbers-zero-style = "{C['slate']}"
+{diff}
     line-numbers-left-style = "{C['stone']}"
     line-numbers-right-style = "{C['stone']}"
     commit-decoration-style = "{C['gold']}" box
@@ -556,7 +569,7 @@ gui:
     markedBaseCommitBgColor:
       - "{C['sky']}"
     unstagedChangesColor:
-      - "{C['crimson']}"
+      - "{C['crimson']}"{chr(10) + "      - bold" if MONO else ""}
     defaultFgColor:
       - "{C['paper']}"
   authorColors:
@@ -565,11 +578,35 @@ gui:
     main: "{C['crimson']}"
     master: "{C['crimson']}"
 """
-    return write("lazygit/config.yml", t)
+    return write(f"lazygit/config{SUFFIX}.yml", t)
+
+
+def dotfiles():
+    """kitty.conf and the Ghostty config, adapted to the active variant."""
+    out = []
+    base = os.path.join(ROOT, "dotfiles")
+    if not MONO:
+        return out
+    k = open(os.path.join(base, "kitty", "kitty.conf")).read()
+    k = k.replace("themes/ghost-of-tsushima.conf", f"themes/{SLUG}.conf")
+    k = k.replace("# ink, paper, lacquer red and gold leaf", "# Kurosawa mode: black and white, no colour")
+    k = k.replace("# a red brushstroke trail", "# a silver brushstroke trail")
+    p = os.path.join(base, "kitty", f"kitty{SUFFIX}.conf")
+    open(p, "w").write(k)
+    g = open(os.path.join(base, "ghostty", "config")).read()
+    g = g.replace("theme = ghost-of-tsushima", f"theme = {SLUG}")
+    g = g.replace("# 冥人 Ghost of Tsushima — Ghostty", "# 冥人 Ghost of Tsushima, Kurosawa mode — Ghostty")
+    g = g.replace("ink screen with a red glow", "ink screen, in black and white")
+    import re
+    g = re.sub(r"macos-icon-ghost-color = .*", f"macos-icon-ghost-color = {C['paper']}", g)
+    g = re.sub(r"macos-icon-screen-color = .*", f"macos-icon-screen-color = {C['charcoal']},{ROLE['icon_screen']}", g)
+    p2 = os.path.join(base, "ghostty", f"config{SUFFIX}")
+    open(p2, "w").write(g)
+    return [p, p2]
 
 
 def main():
-    out = [terminal_app(), *iterm(), ghostty(), kitty(), alacritty(), wezterm(), btop(), tmtheme(), delta(), lazygit()]
+    out = [*dotfiles(), terminal_app(), *iterm(), ghostty(), kitty(), alacritty(), wezterm(), btop(), tmtheme(), delta(), lazygit()]
     for p in out:
         print("wrote", os.path.relpath(p, ROOT))
 
