@@ -5,7 +5,7 @@ plugins), JankyBorders and VS Code / Cursor colours.
 Nerd Font glyphs are written with chr() so the shell scripts contain real
 characters (macOS /bin/bash 3.2 cannot expand \\u escapes).
 
-usage: desktop.py [ROOT]
+usage: [GOT_VARIANT=kurosawa] desktop.py [ROOT]
 """
 import json
 import os
@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from palette import C, NAME, ROLE  # noqa: E402
+from palette import C, MONO, NAME, ROLE, SUFFIX  # noqa: E402
 from emblem import emblem_svg  # noqa: E402
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,19 +41,33 @@ def write(rel, text, exe=False):
     print("wrote", rel)
 
 
+def enso_icon():
+    # the ensō for the bar: rendered from the emblem, 64 px (shown at 32)
+    icon = os.path.join(ROOT, "sketchybar", "icons", f"enso{SUFFIX}.png")
+    os.makedirs(os.path.dirname(icon), exist_ok=True)
+    subprocess.run(["rsvg-convert", "-w", "64", "-h", "64", "-o", icon], input=emblem_svg(1024, small=True).encode(),
+                   check=True)
+    print(f"wrote sketchybar/icons/enso{SUFFIX}.png")
+
+
 def sketchybar():
     cols = "\n".join(f"export {k.upper()}={argb(v)}" for k, v in C.items())
-    write("sketchybar/colors.sh", f"""#!/usr/bin/env bash
+    write(f"sketchybar/colors{SUFFIX}.sh", f"""#!/usr/bin/env bash
 # {HDR}
 # Colours are 0xAARRGGBB.
 {cols}
 
-export BAR_COLOR=0xf00b0a0a
+export BAR_COLOR={argb(C['ink'], 'f0')}
 export BAR_BORDER={argb(C['blood'])}
 export ITEM_BG={argb(C['ash'])}
 export ACCENT={argb(C['lacquer'])}
+export FOCUS={argb(ROLE['focus'])}
 export TRANSPARENT=0x00000000
 """, exe=True)
+
+    enso_icon()
+    if MONO:        # the bar and its plugins are shared; only colours and the icon differ
+        return
 
     kanji = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
     write("sketchybar/sketchybarrc", f"""#!/usr/bin/env bash
@@ -288,25 +302,19 @@ SSID="${{SSID:-online}}"
 sketchybar --set "$NAME" icon="{GL['wifi']}" icon.color="$SKY" label="$SSID"
 """, exe=True)
 
-    # the ensō for the bar: rendered from the emblem, 64 px (shown at 32)
-    icon = os.path.join(ROOT, "sketchybar", "icons", "enso.png")
-    os.makedirs(os.path.dirname(icon), exist_ok=True)
-    subprocess.run(["rsvg-convert", "-w", "64", "-h", "64", "-o", icon], input=emblem_svg(1024, small=True).encode(),
-                   check=True)
-    print("wrote sketchybar/icons/enso.png")
 
 
 def borders():
-    write("borders/bordersrc", f"""#!/usr/bin/env bash
+    write(f"borders/bordersrc{SUFFIX}", f"""#!/usr/bin/env bash
 # {HDR}
 # JankyBorders: ~/.config/borders/bordersrc (brew install FelixKratz/formulae/borders)
-# Focused window: lacquer red. Everything else: ash.
+# Focused window: {"silver-white" if MONO else "lacquer red"}. Everything else: ash.
 options=(
   style=round
   width=5.0
   hidpi=on
   order=above
-  active_color={argb(C['lacquer'])}
+  active_color={argb(ROLE['focus'])}
   inactive_color={argb(C['ash'])}
 )
 
@@ -328,35 +336,35 @@ def vscode():
         "editorGutter.deletedBackground": c["crimson"], "editorError.foreground": c["crimson"],
         "editorWarning.foreground": c["gold"], "editorInfo.foreground": c["sky"],
         "activityBar.background": c["ink"], "activityBar.foreground": c["paper"],
-        "activityBar.inactiveForeground": c["smoke"], "activityBar.activeBorder": c["lacquer"],
+        "activityBar.inactiveForeground": c["smoke"], "activityBar.activeBorder": ROLE["focus"],
         "activityBarBadge.background": c["lacquer"], "activityBarBadge.foreground": c["paper_hi"],
         "sideBar.background": c["ink"], "sideBar.foreground": c["rice"], "sideBar.border": c["ink"],
         "sideBarTitle.foreground": c["vermilion"], "sideBarSectionHeader.background": c["ink"],
         "sideBarSectionHeader.foreground": c["gold"], "list.activeSelectionBackground": c["stone"],
         "list.activeSelectionForeground": c["paper_hi"], "list.hoverBackground": c["ash"],
         "list.inactiveSelectionBackground": c["ash"], "list.highlightForeground": c["vermilion"],
-        "list.focusOutline": c["lacquer"], "focusBorder": c["lacquer"],
+        "list.focusOutline": ROLE["focus"], "focusBorder": ROLE["focus"],
         "titleBar.activeBackground": c["ink"], "titleBar.activeForeground": c["paper"],
         "titleBar.inactiveBackground": c["ink"], "titleBar.inactiveForeground": c["smoke"],
         "statusBar.background": c["ink"], "statusBar.foreground": c["mist"], "statusBar.border": c["blood"],
         "statusBar.debuggingBackground": c["lacquer"], "statusBar.noFolderBackground": c["ink"],
         "statusBarItem.remoteBackground": c["lacquer"], "statusBarItem.remoteForeground": c["paper_hi"],
         "tab.activeBackground": ROLE["background"], "tab.activeForeground": c["paper_hi"],
-        "tab.activeBorderTop": c["lacquer"], "tab.inactiveBackground": c["ink"],
+        "tab.activeBorderTop": ROLE["focus"], "tab.inactiveBackground": c["ink"],
         "tab.inactiveForeground": c["smoke"], "tab.border": c["ink"], "editorGroupHeader.tabsBackground": c["ink"],
-        "panel.background": c["ink"], "panel.border": c["stone"], "panelTitle.activeBorder": c["lacquer"],
+        "panel.background": c["ink"], "panel.border": c["stone"], "panelTitle.activeBorder": ROLE["focus"],
         "panelTitle.activeForeground": c["paper"], "terminal.background": ROLE["background"],
         "terminal.foreground": c["paper"], "terminalCursor.foreground": c["vermilion"],
         "button.background": c["lacquer"], "button.foreground": c["paper_hi"], "button.hoverBackground": c["crimson"],
         "badge.background": c["lacquer"], "badge.foreground": c["paper_hi"],
-        "input.background": c["ash"], "input.border": c["stone"], "inputOption.activeBorder": c["lacquer"],
+        "input.background": c["ash"], "input.border": c["stone"], "inputOption.activeBorder": ROLE["focus"],
         "dropdown.background": c["ash"], "quickInput.background": c["ash"],
         "progressBar.background": c["lacquer"], "textLink.foreground": c["sky"],
         "scrollbarSlider.background": c["stone"] + "99", "scrollbarSlider.hoverBackground": c["slate"],
         "scrollbarSlider.activeBackground": c["blood"], "gitDecoration.modifiedResourceForeground": c["gold"],
         "gitDecoration.untrackedResourceForeground": c["moss"], "gitDecoration.deletedResourceForeground": c["crimson"],
         "editorWidget.background": c["ash"], "editorSuggestWidget.background": c["ash"],
-        "editorSuggestWidget.selectedBackground": c["blood"], "peekView.border": c["lacquer"],
+        "editorSuggestWidget.selectedBackground": c["blood"], "peekView.border": ROLE["focus"],
         "breadcrumb.foreground": c["smoke"], "breadcrumb.focusForeground": c["paper"],
     }
     names = ["Black", "Red", "Green", "Yellow", "Blue", "Magenta", "Cyan", "White"]
@@ -366,11 +374,13 @@ def vscode():
         ui[f"terminal.ansiBright{n}"] = ANSI[i + 8]
     tok = {"textMateRules": [
         {"scope": ["comment", "punctuation.definition.comment"], "settings": {"foreground": c["smoke"], "fontStyle": "italic"}},
-        {"scope": ["keyword", "storage.type", "storage.modifier", "keyword.control"], "settings": {"foreground": c["crimson"]}},
+        {"scope": ["keyword", "storage.type", "storage.modifier", "keyword.control"],
+         "settings": {"foreground": c["crimson"], **({"fontStyle": "bold"} if MONO else {})}},
         {"scope": ["string", "string.quoted"], "settings": {"foreground": c["moss"]}},
         {"scope": ["constant.numeric", "constant.language", "constant"], "settings": {"foreground": c["ember"]}},
         {"scope": ["entity.name.function", "support.function", "meta.function-call"], "settings": {"foreground": c["gold_hi"]}},
-        {"scope": ["entity.name.type", "entity.name.class", "support.type", "support.class"], "settings": {"foreground": c["sky"]}},
+        {"scope": ["entity.name.type", "entity.name.class", "support.type", "support.class"],
+         "settings": {"foreground": c["sky"], **({"fontStyle": "italic"} if MONO else {})}},
         {"scope": ["variable.parameter"], "settings": {"foreground": c["pampas"], "fontStyle": "italic"}},
         {"scope": ["variable.other.property", "variable.other.member", "support.type.property-name"], "settings": {"foreground": c["pampas"]}},
         {"scope": ["keyword.operator", "punctuation"], "settings": {"foreground": c["mist"]}},
@@ -390,7 +400,7 @@ def vscode():
         "editor.cursorBlinking": "smooth",
         "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font'",
     }
-    write("vscode/settings.json", json.dumps(settings, indent=2, ensure_ascii=False) + "\n")
+    write(f"vscode/settings{SUFFIX}.json", json.dumps(settings, indent=2, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Ghost of Tsushima Kurosawa — generated from palette.json by src/desktop.py
+# Colours are 0xAARRGGBB.
+export INK=0xff0a0a0a
+export CHARCOAL=0xff121212
+export ASH=0xff1c1c1c
+export STONE=0xff262626
+export SLATE=0xff3a3a3a
+export SMOKE=0xff808080
+export MIST=0xffa6a6a6
+export RICE=0xffc4c4c4
+export PAPER=0xffe4e4e4
+export PAPER_HI=0xfff5f5f5
+export BLOOD=0xff404040
+export LACQUER=0xff5e5e5e
+export CRIMSON=0xfff0f0f0
+export VERMILION=0xfffafafa
+export EMBER=0xffd0d0d0
+export GOLD=0xffb8b8b8
+export GOLD_HI=0xffdcdcdc
+export PAMPAS=0xffc8c8c8
+export INDIGO=0xff7f7f7f
+export SKY=0xffb0b0b0
+export BAMBOO=0xff8f8f8f
+export MOSS=0xffa8a8a8
+export SAKURA=0xff9c9c9c
+export BLOSSOM=0xffbcbcbc
+export PATINA=0xffb2b2b2
+export JADE=0xffc0c0c0
+export SUGGEST=0xff5c5c5c
+export DIFF_ADD=0xff2a2a2a
+export DIFF_ADD_EMPH=0xff474747
+export DIFF_CHANGE=0xff1f1f1f
+export DIFF_DELETE=0xff0b0b0b
+export DIFF_DELETE_EMPH=0xff000000
+export DIFF_TEXT=0xff3a3a3a
+export VT_ERROR=0xff202020
+export VT_WARN=0xff1c1c1c
+export VT_INFO=0xff181818
+export VT_HINT=0xff181818
+
+export BAR_COLOR=0xf00a0a0a
+export BAR_BORDER=0xff404040
+export ITEM_BG=0xff1c1c1c
+export ACCENT=0xff5e5e5e
+export FOCUS=0xffe4e4e4
+export TRANSPARENT=0x00000000
