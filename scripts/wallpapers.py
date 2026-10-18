@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """冥人 Ghost of Tsushima wallpapers: pick, render or download, and set them.
 
-Two catalogs, numbered together:
+Three catalogs, numbered together:
   Originals   painted from code by src/wallpapers.py and rendered on your machine
               at your screen's resolution (needs numpy, pillow and rsvg-convert)
+  Kurosawa    the same scenes graded in black and white, like the game's film mode
   wallhaven   top-rated 4K Ghost of Tsushima art, fetched live from wallhaven.cc
               (SFW, landscape, at least 3840x2160, sorted by favourites)
 
@@ -11,6 +12,8 @@ Run it with no options for an interactive menu, or:
   wallpapers.py --list                    show both catalogs and exit
   wallpapers.py --get 1,3,7               fetch by number (ranges like 7-12 and "all" work)
   wallpapers.py --originals all           render every original (or names / numbers: Higanbana,2)
+  wallpapers.py --variant kurosawa --originals all    the black-and-white versions
+  wallpapers.py --originals Higanbana-BW  one black-and-white scene
   wallpapers.py --wallhaven 10            download the 10 most-favourited wallhaven images
   wallpapers.py --res 5120x2880           render size for originals (default: your screen)
   wallpapers.py --dest DIR                where files go (default ~/Pictures/Wallpapers/GhostOfTsushima)
@@ -57,6 +60,8 @@ ORIGINALS = [
     ("GuidingWind", "minimal: white brushed wind on ink and a red 冥人 seal"),
     ("GuidingWindPaper", "the same on washi paper (light)"),
 ]
+ORIGINALS = ORIGINALS + [(k + "-BW", "black and white, film grain") for k, _ in ORIGINALS]
+COLOUR = len(ORIGINALS) // 2
 
 RED, GOLD, DIM, PAPER, OFF = "\033[38;2;226;61;67m", "\033[38;2;201;164;92m", "\033[38;2;131;122;115m", "\033[38;2;236;230;220m", "\033[0m"
 if not sys.stdout.isatty() or os.environ.get("NO_COLOR"):
@@ -181,8 +186,11 @@ def render_deps_ok():
 
 def render_original(key, res, dest):
     w, h = res
+    bw = key.endswith("-BW")
+    scene = key[:-3] if bw else key
     say(f"Painting {GOLD}{key}{OFF} at {w}x{h} (about a minute at 4K, a few at 5K and up)")
-    r = subprocess.run([sys.executable, GENERATOR, "--scene", key, "--res", f"{w}x{h}", "--out", dest])
+    r = subprocess.run([sys.executable, GENERATOR, "--scene", scene, "--res", f"{w}x{h}", "--out", dest]
+                       + (["--bw"] if bw else []))
     if r.returncode != 0:
         say(f"rendering {key} failed")
         return None
@@ -266,7 +274,9 @@ def show(catalog, res):
     print(f"\n{RED}冥人{OFF}  {PAPER}GHOST OF TSUSHIMA WALLPAPERS{OFF}\n")
     print(f"{GOLD}Originals{OFF} {DIM}(painted from code, rendered here at {res[0]}x{res[1]}){OFF}")
     for i, (key, desc) in enumerate(ORIGINALS, 1):
-        print(f"  {RED}{i:>2}{OFF}  {key:<17} {DIM}{desc}{OFF}")
+        if i == COLOUR + 1:
+            print(f"\n{GOLD}Originals in Kurosawa mode{OFF} {DIM}(black and white){OFF}")
+        print(f"  {RED}{i:>2}{OFF}  {key:<20} {DIM}{desc}{OFF}")
     print(f"\n{GOLD}4K art from wallhaven{OFF} {DIM}(belongs to its artists; personal use){OFF}")
     if not catalog:
         print(f"  {DIM}(unavailable: offline or wallhaven did not answer){OFF}")
@@ -308,6 +318,8 @@ def main():
     ap.add_argument("--set", metavar="FILE", help="set FILE as the macOS desktop picture")
     ap.add_argument("--set-first", action="store_true", help="after fetching, set the first file as the desktop")
     ap.add_argument("--refresh", action="store_true", help="ignore the cached wallhaven list")
+    ap.add_argument("--variant", choices=["red", "kurosawa"], default="red",
+                    help="with --originals: colour scenes (red) or black-and-white ones (kurosawa)")
     a = ap.parse_args()
     dest = os.path.expanduser(a.dest)
 
@@ -338,15 +350,17 @@ def main():
     if a.get:
         numbers += parse_selection(a.get, total)
     if a.originals:
+        off = COLOUR if a.variant == "kurosawa" else 0
         if a.originals.strip().lower() == "all":
-            numbers += list(range(1, len(ORIGINALS) + 1))
+            numbers += list(range(off + 1, off + COLOUR + 1))
         else:
             keys = [k.lower() for k, _ in ORIGINALS]
             for part in re.split(r"[,\s]+", a.originals.strip()):
                 if part.isdigit() and 1 <= int(part) <= len(ORIGINALS):
                     numbers.append(int(part))
                 elif part.lower() in keys:
-                    numbers.append(keys.index(part.lower()) + 1)
+                    i = keys.index(part.lower())
+                    numbers.append(i + 1 + (off if i < COLOUR else 0))
                 elif part:
                     note(f"unknown original '{part}'")
     if a.wallhaven:
