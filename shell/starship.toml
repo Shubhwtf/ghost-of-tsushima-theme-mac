@@ -1,0 +1,144 @@
+# Ghost of Tsushima — generated from palette.json by src/shell.py
+# 冥人 — ink, lacquer and gold leaf. Needs a Nerd Font.
+"$schema" = "https://starship.rs/config-schema.json"
+
+palette = "ghost_of_tsushima"
+add_newline = true
+command_timeout = 800
+
+format = """
+[](fg:lacquer)\
+[ 冥 ](bold fg:paper_hi bg:lacquer)\
+[](fg:lacquer bg:blood)\
+$directory\
+[](fg:blood bg:stone)\
+$git_branch\
+$git_status\
+[](fg:stone bg:ash)\
+$nodejs$python$rust$golang$lua$bun$docker_context\
+[](fg:ash)\
+$fill\
+$cmd_duration\
+$time
+$character"""
+
+[palettes.ghost_of_tsushima]
+ink = "#0b0a0a"
+charcoal = "#141212"
+ash = "#1e1b1a"
+stone = "#2a2523"
+slate = "#3a3330"
+smoke = "#837a73"
+mist = "#a89f96"
+rice = "#c9c1b5"
+paper = "#ece6dc"
+paper_hi = "#f6f1e7"
+blood = "#8e1118"
+lacquer = "#c1121f"
+crimson = "#e23d43"
+vermilion = "#e0452b"
+ember = "#e8704a"
+gold = "#c9a45c"
+gold_hi = "#e2c27f"
+pampas = "#d8c9a3"
+indigo = "#4f7ca8"
+sky = "#82a9d1"
+bamboo = "#7a9a5a"
+moss = "#9db97c"
+sakura = "#c97a8d"
+blossom = "#e3a3b2"
+patina = "#5f9c94"
+jade = "#86c2b9"
+
+[directory]
+style = "bold fg:paper_hi bg:blood"
+format = "[ $path ]($style)[$read_only]($read_only_style)"
+read_only = " "
+read_only_style = "fg:gold_hi bg:blood"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = " ~"
+
+[directory.substitutions]
+"Documents" = " Documents"
+"Developer" = " Developer"
+"Projects" = " Projects"
+
+[git_branch]
+symbol = ""
+style = "bg:stone"
+format = "[[ $symbol $branch ](fg:gold_hi bg:stone)]($style)"
+
+[git_status]
+style = "bg:stone"
+format = "[[($all_status$ahead_behind )](fg:blossom bg:stone)]($style)"
+conflicted = "⚔"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕"
+modified = "~"
+staged = "+"
+untracked = "?"
+deleted = "✗"
+stashed = "≡"
+
+[nodejs]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:moss bg:ash)]($style)"
+
+[python]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version)( \\($virtualenv\\)) ](fg:sky bg:ash)]($style)"
+
+[rust]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:ember bg:ash)]($style)"
+
+[golang]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:jade bg:ash)]($style)"
+
+[lua]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:sky bg:ash)]($style)"
+
+[bun]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $version) ](fg:pampas bg:ash)]($style)"
+
+[docker_context]
+symbol = ""
+style = "bg:ash"
+format = "[[ $symbol( $context) ](fg:sky bg:ash)]($style)"
+
+[fill]
+symbol = " "
+
+[cmd_duration]
+min_time = 1500
+format = "[ $duration ](fg:gold)"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[](fg:ash)[  $time ](fg:mist bg:ash)[](fg:ash)"
+
+[character]
+success_symbol = "[\U000f04e5 ❯](bold fg:crimson)"
+error_symbol = "[\U000f04e5 ❯](bold fg:gold)"
+vimcmd_symbol = "[\U000f04e5 ❮](bold fg:moss)"
+
+[username]
+show_always = false
+style_user = "fg:pampas"
+format = "[$user ]($style)"
+
+[hostname]
+ssh_only = true
+format = "[@$hostname ](fg:pampas)"
