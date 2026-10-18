@@ -37,5 +37,5 @@ return {
   vt_warn          = "#1c1c1c",
   vt_info          = "#181818",
   vt_hint          = "#181818",
-  terminal = { "#1f1f1f", "#f5f5f5", "#8f8f8f", "#c4c4c4", "#7f7f7f", "#a0a0a0", "#b2b2b2", "#d6d6d6", "#6a6a6a", "#ffffff", "#a8a8a8", "#dadada", "#9a9a9a", "#bababa", "#cacaca", "#ebebeb" },
+  terminal = { "#1f1f1f", "#f5f5f5", "#9a9a9a", "#d0d0d0", "#898989", "#ababab", "#bdbdbd", "#e2e2e2", "#808080", "#ffffff", "#a3a3a3", "#d9d9d9", "#919191", "#b4b4b4", "#c7c7c7", "#ececec" },
 }

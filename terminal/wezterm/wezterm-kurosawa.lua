@@ -15,8 +15,8 @@ local scheme = {
   split = "#3a3a3a",
   visual_bell = "#404040",
   compose_cursor = "#b8b8b8",
-  ansi = { "#1f1f1f", "#f5f5f5", "#8f8f8f", "#c4c4c4", "#7f7f7f", "#a0a0a0", "#b2b2b2", "#d6d6d6" },
-  brights = { "#6a6a6a", "#ffffff", "#a8a8a8", "#dadada", "#9a9a9a", "#bababa", "#cacaca", "#ebebeb" },
+  ansi = { "#1f1f1f", "#f5f5f5", "#9a9a9a", "#d0d0d0", "#898989", "#ababab", "#bdbdbd", "#e2e2e2" },
+  brights = { "#808080", "#ffffff", "#a3a3a3", "#d9d9d9", "#919191", "#b4b4b4", "#c7c7c7", "#ececec" },
   tab_bar = {
     background = "#0a0a0a",
     active_tab = { bg_color = "#5e5e5e", fg_color = "#f5f5f5", intensity = "Bold" },

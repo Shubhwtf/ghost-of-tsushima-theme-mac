@@ -62,6 +62,12 @@ def luminance(h):
     return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b)
 
 
+def lightness(h):
+    """CIE L* (0..100), the perceptual lightness the ANSI ramp is spaced by."""
+    y = luminance(h)
+    return 116 * y ** (1 / 3) - 16 if y > 216 / 24389 else y * 24389 / 27
+
+
 def contrast(a, b):
     la, lb = sorted((luminance(a), luminance(b)), reverse=True)
     return (la + 0.05) / (lb + 0.05)
@@ -80,7 +86,7 @@ def check(variant):
         r = contrast(c[n], bg)
         if r < 4.5 and not (variant == "red" and n == "indigo"):
             bad.append(f"{n} {r:.2f}")
-    for i, a in enumerate(ansi[1:8] + ansi[9:], 1):
+    for a in ansi[1:]:
         if contrast(a, bg) < 4.5:
             bad.append(f"ansi {a} {contrast(a, bg):.2f}")
     pairs = [("selection", role["selection_fg"], role["selection_bg"]), ("accent", c["paper_hi"], c["lacquer"]),
@@ -93,12 +99,20 @@ def check(variant):
         hues += [a for a in ansi if len({a[1:3], a[3:5], a[5:7]}) != 1]
         if hues:
             bad.append("not gray: " + ", ".join(hues))
-        lv = sorted(luminance(a) for a in ansi[:8])
-        if len(set(round(x, 3) for x in lv)) != 8:
-            bad.append("normal ANSI colours share a luminance")
+        # with no hue, luminance is the only cue: every ANSI colour must be told apart from
+        # every other by lightness (a ~3.3 L* ramp; >= 2.9 after 8-bit rounding), and within
+        # the normal and the bright set by >= 6 L*
+        lv = [lightness(a) for a in ansi]
+        for i in range(16):
+            for j in range(i + 1, 16):
+                need = 6 if i // 8 == j // 8 else 2.9
+                if abs(lv[i] - lv[j]) < need:
+                    bad.append(f"ansi {i} and {j} are {abs(lv[i] - lv[j]):.1f} L* apart (need {need})")
     print(f"{name}: " + ("ok" if not bad else "FAIL " + "; ".join(bad)))
     for n in TEXT:
         print(f"  {n:10s} {c[n]}  {contrast(c[n], bg):5.2f}:1")
+    for i, a in enumerate(ansi):
+        print(f"  ansi {i:<5d} {a}  {contrast(a, bg):5.2f}:1  L* {lightness(a):5.1f}")
     return not bad
 
 
