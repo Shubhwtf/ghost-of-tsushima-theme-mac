@@ -3,6 +3,7 @@
 #
 # usage: ./uninstall.sh [--keep-defaults]
 #
+# Works for both variants (red and Kurosawa), and for a mix of them after switching.
 # Moves every file the installer put down into ~/.got-removed-<timestamp>,
 # restores the configs you had before from the oldest ~/.got-backup-*,
 # removes the theme's lines from ~/.zshrc and, on macOS, puts the appearance
@@ -63,7 +64,11 @@ if [[ -f "$HOME/.zshrc" ]] && grep -q '# ghost-of-tsushima' "$HOME/.zshrc"; then
 fi
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
-    if [[ "$(defaults read com.apple.Terminal 'Default Window Settings' 2>/dev/null || true)" == "Ghost of Tsushima" ]]; then
+    case "$(defaults read com.apple.Terminal 'Default Window Settings' 2>/dev/null || true)" in
+        "Ghost of Tsushima"|"Ghost of Tsushima Kurosawa") themed=1 ;;
+        *) themed=0 ;;
+    esac
+    if [[ $themed -eq 1 ]]; then
         defaults write com.apple.Terminal "Default Window Settings" -string "Basic"
         defaults write com.apple.Terminal "Startup Window Settings" -string "Basic"
         say "Terminal.app is back on the Basic profile"
