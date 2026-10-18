@@ -108,6 +108,21 @@ Re-running with the other variant swaps only the theme files it installed. In Ne
 
 ## Wallpapers
 
+The theme on real Ghost of Tsushima wallpapers, the 4K art `scripts/wallpapers.py` downloads from wallhaven:
+
+![Tiled desktop on a red spider lily landscape](assets/screenshots/fan-tiled.jpg)
+<sub>Wallpaper: [wallhaven e7vgml](https://wallhaven.cc/w/e7vgml), uploaded by [HKkkkkkkkk](https://wallhaven.cc/user/HKkkkkkkkk) (no source given)</sub>
+
+![fastfetch on a black-and-white pier](assets/screenshots/fan-fetch.jpg)
+<sub>Wallpaper: [wallhaven rdpd9w](https://wallhaven.cc/w/rdpd9w), uploaded by [Hellsingexe](https://wallhaven.cc/user/Hellsingexe) (no source given)</sub>
+
+![Neovim dashboard on official key art](assets/screenshots/fan-dashboard.jpg)
+<sub>Wallpaper: [wallhaven g72wqd](https://wallhaven.cc/w/g72wqd), official art via [Sucker Punch Productions](https://www.suckerpunch.com/category/game/ghostoftsushima/), uploaded by [Konozettoda](https://wallhaven.cc/user/Konozettoda)</sub>
+
+All rights to this artwork belong to its artists and to Sucker Punch Productions / Sony Interactive Entertainment. It is not part of this repository. If one of these is yours and you would like it credited differently or removed, please open an issue.
+
+### Originals painted from code
+
 ![The six original wallpapers](assets/screenshots/wallpapers.jpg)
 
 <p align="center"><sub><i>Higanbana</i> · <i>Torii at Dawn</i> · <i>Standoff</i> · <i>Kurosawa</i> · <i>Guiding Wind</i> · <i>Guiding Wind (paper)</i></sub></p>
@@ -125,19 +140,6 @@ python3 scripts/wallpapers.py --set ~/Pictures/Wallpapers/GhostOfTsushima/wallha
 ```
 
 Files land in `~/Pictures/Wallpapers/GhostOfTsushima/`. On macOS the default render size is read from `system_profiler`. Painting the originals needs `pip3 install numpy pillow` and `brew install librsvg`; the script tells you if anything is missing. The wallhaven side uses only the Python standard library. It searches SFW, landscape images of at least 3840×2160, sorted by favourites, skips off-topic results, backs off politely on rate limits, and writes a `CREDITS.txt` with every link, uploader and source next to the downloads.
-
-### With official-style art
-
-![Tiled desktop on a red spider lily landscape](assets/screenshots/fan-tiled.jpg)
-<sub>Wallpaper: [wallhaven e7vgml](https://wallhaven.cc/w/e7vgml), uploaded by [HKkkkkkkkk](https://wallhaven.cc/user/HKkkkkkkkk) (no source given)</sub>
-
-![fastfetch on a black-and-white pier](assets/screenshots/fan-fetch.jpg)
-<sub>Wallpaper: [wallhaven rdpd9w](https://wallhaven.cc/w/rdpd9w), uploaded by [Hellsingexe](https://wallhaven.cc/user/Hellsingexe) (no source given)</sub>
-
-![Neovim dashboard on official key art](assets/screenshots/fan-dashboard.jpg)
-<sub>Wallpaper: [wallhaven g72wqd](https://wallhaven.cc/w/g72wqd), official art via [Sucker Punch Productions](https://www.suckerpunch.com/category/game/ghostoftsushima/), uploaded by [Konozettoda](https://wallhaven.cc/user/Konozettoda)</sub>
-
-All rights to this artwork belong to its artists and to Sucker Punch Productions / Sony Interactive Entertainment. It is not part of this repository. If one of these is yours and you would like it credited differently or removed, please open an issue.
 
 ## Install
 
