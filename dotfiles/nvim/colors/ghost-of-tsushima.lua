@@ -1,1 +1,1 @@
-require("got").load()
+require("got").load("red")

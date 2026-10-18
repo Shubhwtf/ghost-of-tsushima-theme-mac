@@ -1,9 +1,11 @@
 -- Ghost of Tsushima colorscheme for Neovim
 -- https://github.com/Shubhwtf/ghost-of-tsushima-theme-mac
--- ink, washi paper, lacquer red and gold leaf
+-- ink, washi paper, lacquer red and gold leaf; or Kurosawa mode, in black and white
 
 local M = {}
 
+M.palettes = { red = "got.palette", kurosawa = "got.palette_kurosawa" }
+M.variant = "red"
 M.palette = require("got.palette")
 M.config = { transparent = false, italic_comments = true }
 
@@ -185,10 +187,10 @@ local function groups(c, cfg)
     DiagnosticInfo = { fg = c.sky },
     DiagnosticHint = { fg = c.jade },
     DiagnosticOk = { fg = c.moss },
-    DiagnosticVirtualTextError = { fg = c.crimson, bg = "#241213" },
-    DiagnosticVirtualTextWarn = { fg = c.gold, bg = "#231d13" },
-    DiagnosticVirtualTextInfo = { fg = c.sky, bg = "#161b21" },
-    DiagnosticVirtualTextHint = { fg = c.jade, bg = "#151c1b" },
+    DiagnosticVirtualTextError = { fg = c.crimson, bg = c.vt_error },
+    DiagnosticVirtualTextWarn = { fg = c.gold, bg = c.vt_warn },
+    DiagnosticVirtualTextInfo = { fg = c.sky, bg = c.vt_info },
+    DiagnosticVirtualTextHint = { fg = c.jade, bg = c.vt_hint },
     DiagnosticUnderlineError = { sp = c.crimson, undercurl = true },
     DiagnosticUnderlineWarn = { sp = c.gold, undercurl = true },
     DiagnosticUnderlineInfo = { sp = c.sky, undercurl = true },
@@ -200,10 +202,10 @@ local function groups(c, cfg)
     LspSignatureActiveParameter = { fg = c.gold_hi, bold = true, underline = true },
 
     -- diff / git --------------------------------------------------------------
-    DiffAdd = { bg = "#18221a" },
-    DiffChange = { bg = "#262016" },
-    DiffDelete = { fg = c.crimson, bg = "#2a1214" },
-    DiffText = { bg = "#3d3218" },
+    DiffAdd = { bg = c.diff_add },
+    DiffChange = { bg = c.diff_change },
+    DiffDelete = { fg = c.crimson, bg = c.diff_delete },
+    DiffText = { bg = c.diff_text },
     GitSignsAdd = { fg = c.moss },
     GitSignsChange = { fg = c.gold },
     GitSignsDelete = { fg = c.crimson },
@@ -266,19 +268,52 @@ local function groups(c, cfg)
   }
 end
 
-function M.load()
+-- Kurosawa mode has no hue, so meaning is carried by weight, slant and lines
+local function mono(c)
+  return {
+    Keyword = { bold = true }, Statement = { bold = true }, Conditional = { bold = true },
+    Repeat = { bold = true }, Exception = { bold = true }, StorageClass = { bold = true },
+    ["@keyword"] = { bold = true }, ["@keyword.function"] = { bold = true, italic = true },
+    ["@keyword.return"] = { bold = true }, ["@keyword.exception"] = { bold = true },
+    Type = { italic = true }, ["@type"] = { italic = true }, ["@constructor"] = { italic = true },
+    Title = { bold = true }, Directory = { bold = true }, MatchParen = { bold = true, underline = true },
+    DiagnosticError = { bold = true }, DiagnosticWarn = { italic = true },
+    DiagnosticUnderlineError = { undercurl = true }, DiagnosticUnderlineWarn = { underdashed = true },
+    DiagnosticUnderlineInfo = { underdotted = true }, DiagnosticUnderlineHint = { underdotted = true },
+    Added = { bold = true }, Removed = { strikethrough = true }, Changed = { italic = true },
+    ["@diff.plus"] = { bold = true }, ["@diff.minus"] = { strikethrough = true },
+    DiffDelete = { fg = c.smoke }, GitSignsAdd = { fg = c.paper_hi, bold = true },
+    GitSignsChange = { fg = c.mist }, GitSignsDelete = { fg = c.smoke },
+    NeoTreeGitAdded = { bold = true }, NeoTreeGitModified = { italic = true },
+    NeoTreeGitDeleted = { strikethrough = true }, NeoTreeGitUntracked = { italic = true },
+    ["@markup.heading"] = { bold = true }, ["@markup.heading.1"] = { bold = true, underline = true },
+    IncSearch = { bold = true }, CurSearch = { bold = true }, Todo = { bold = true },
+  }
+end
+
+function M.load(variant)
+  variant = variant or vim.g.got_variant or "red"
+  if not M.palettes[variant] then variant = "red" end
   if vim.g.colors_name then
     vim.cmd("hi clear")
   end
   vim.o.termguicolors = true
   vim.o.background = "dark"
-  vim.g.colors_name = "ghost-of-tsushima"
+  M.variant = variant
+  M.palette = require(M.palettes[variant])
+  vim.g.colors_name = variant == "red" and "ghost-of-tsushima" or "ghost-of-tsushima-" .. variant
   local c = M.palette
-  for name, spec in pairs(groups(c, M.config)) do
+  local all = groups(c, M.config)
+  if variant == "kurosawa" then
+    for name, extra in pairs(mono(c)) do
+      all[name] = vim.tbl_extend("force", all[name] or {}, extra)
+    end
+  end
+  for name, spec in pairs(all) do
     vim.api.nvim_set_hl(0, name, spec)
   end
   -- dashboard art colours
-  local ok, art = pcall(require, "got.enso")
+  local ok, art = pcall(require, variant == "red" and "got.enso" or "got.enso_" .. variant)
   if ok then
     for name, spec in pairs(art.groups) do
       vim.api.nvim_set_hl(0, name, spec)
