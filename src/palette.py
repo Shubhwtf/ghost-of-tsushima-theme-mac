@@ -1,22 +1,41 @@
-"""The one Ghost of Tsushima palette. Every config in this repo is generated from palette.json."""
+"""The Ghost of Tsushima palettes. Every config in this repo is generated from palette.json.
+
+Two variants share one set of colour names:
+  red       (default) ink, washi paper, lacquer red and gold leaf
+  kurosawa  pure grayscale, after the game's black-and-white film mode
+
+Pick one with the GOT_VARIANT environment variable (red | kurosawa).
+`python3 src/palette.py` prints contrast ratios and checks both variants.
+"""
 import json
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+VARIANTS = ("red", "kurosawa")
 
 with open(os.path.join(ROOT, "palette.json")) as _f:
     _DATA = json.load(_f)
 
-NAME = _DATA["name"]
-SLUG = _DATA["slug"]
-C = dict(_DATA["colors"])                          # name -> "#rrggbb"
-ROLE = {k: C[v] for k, v in _DATA["roles"].items()}  # role -> "#rrggbb"
-ANSI = [C[n] for n in _DATA["ansi"]]               # 16 terminal colors
-ANSI_NAMES = list(_DATA["ansi"])
+
+def load(variant="red"):
+    """Return (name, slug, colours, roles, ansi) for a variant."""
+    if variant not in VARIANTS:
+        raise SystemExit(f"unknown variant {variant!r}; use one of {', '.join(VARIANTS)}")
+    d = _DATA if variant == "red" else _DATA["variants"][variant]
+    colors = dict(d["colors"])
+    roles = {k: colors[v] for k, v in d["roles"].items()}
+    ansi = [colors.get(n, n) for n in d["ansi"]]
+    return d["name"], d["slug"], colors, roles, ansi
+
+
+VARIANT = os.environ.get("GOT_VARIANT", "red")
+NAME, SLUG, C, ROLE, ANSI = load(VARIANT)
+SUFFIX = "" if VARIANT == "red" else f"-{VARIANT}"      # file-name suffix
+MONO = VARIANT == "kurosawa"                              # lean on bold/italic/underline
 
 
 def rgb(h):
-    """'#rrggbb' -> (r, g, b) ints."""
+    """'#rrggbb' (or a colour name) -> (r, g, b) ints."""
     h = C.get(h, h).lstrip("#")
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
@@ -48,9 +67,42 @@ def contrast(a, b):
     return (la + 0.05) / (lb + 0.05)
 
 
+# colours used as text on the background must reach 4.5:1
+TEXT = ["smoke", "mist", "rice", "paper", "paper_hi", "crimson", "vermilion", "ember", "gold", "gold_hi",
+        "pampas", "sky", "bamboo", "moss", "sakura", "blossom", "patina", "jade"]
+
+
+def check(variant):
+    name, _, c, role, ansi = load(variant)
+    bg = role["background"]
+    bad = []
+    for n in TEXT:
+        r = contrast(c[n], bg)
+        if r < 4.5 and not (variant == "red" and n == "indigo"):
+            bad.append(f"{n} {r:.2f}")
+    for i, a in enumerate(ansi[1:8] + ansi[9:], 1):
+        if contrast(a, bg) < 4.5:
+            bad.append(f"ansi {a} {contrast(a, bg):.2f}")
+    pairs = [("selection", role["selection_fg"], role["selection_bg"]), ("accent", c["paper_hi"], c["lacquer"]),
+             ("cursor", role["cursor_text"], role["cursor"]), ("search", c["ink"], c["gold"])]
+    for label, fg, b in pairs:
+        if contrast(fg, b) < 4.5:
+            bad.append(f"{label} {contrast(fg, b):.2f}")
+    if variant == "kurosawa":
+        hues = [k for k, v in c.items() if len({v[1:3], v[3:5], v[5:7]}) != 1]
+        hues += [a for a in ansi if len({a[1:3], a[3:5], a[5:7]}) != 1]
+        if hues:
+            bad.append("not gray: " + ", ".join(hues))
+        lv = sorted(luminance(a) for a in ansi[:8])
+        if len(set(round(x, 3) for x in lv)) != 8:
+            bad.append("normal ANSI colours share a luminance")
+    print(f"{name}: " + ("ok" if not bad else "FAIL " + "; ".join(bad)))
+    for n in TEXT:
+        print(f"  {n:10s} {c[n]}  {contrast(c[n], bg):5.2f}:1")
+    return not bad
+
+
 if __name__ == "__main__":
-    bg = ROLE["background"]
-    for n, h in C.items():
-        print(f"{n:10s} {h}  on bg {contrast(h, bg):5.2f}  on ink {contrast(h, C['ink']):5.2f}")
-    print("selection", round(contrast(ROLE["selection_fg"], ROLE["selection_bg"]), 2))
-    print("paper on lacquer", round(contrast(C["paper_hi"], C["lacquer"]), 2))
+    import sys
+    ok = all([check(v) for v in VARIANTS])
+    sys.exit(0 if ok else 1)
