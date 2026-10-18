@@ -181,7 +181,7 @@ def render_deps_ok():
 
 def render_original(key, res, dest):
     w, h = res
-    say(f"Painting {GOLD}{key}{OFF} at {w}x{h} (this takes a minute or two)")
+    say(f"Painting {GOLD}{key}{OFF} at {w}x{h} (about a minute at 4K, a few at 5K and up)")
     r = subprocess.run([sys.executable, GENERATOR, "--scene", key, "--res", f"{w}x{h}", "--out", dest])
     if r.returncode != 0:
         say(f"rendering {key} failed")
