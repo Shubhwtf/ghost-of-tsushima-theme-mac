@@ -1,0 +1,37 @@
+# Ghost of Tsushima — generated from palette.json by src/terminals.py
+# Merge into ~/Library/Application Support/lazygit/config.yml (macOS) or ~/.config/lazygit/config.yml
+gui:
+  nerdFontsVersion: "3"
+  border: rounded
+  theme:
+    activeBorderColor:
+      - "#e0452b"
+      - bold
+    inactiveBorderColor:
+      - "#3a3330"
+    searchingActiveBorderColor:
+      - "#c9a45c"
+      - bold
+    optionsTextColor:
+      - "#82a9d1"
+    selectedLineBgColor:
+      - "#2a2523"
+    inactiveViewSelectedLineBgColor:
+      - "#1e1b1a"
+    cherryPickedCommitFgColor:
+      - "#0b0a0a"
+    cherryPickedCommitBgColor:
+      - "#c9a45c"
+    markedBaseCommitFgColor:
+      - "#0b0a0a"
+    markedBaseCommitBgColor:
+      - "#82a9d1"
+    unstagedChangesColor:
+      - "#e23d43"
+    defaultFgColor:
+      - "#ece6dc"
+  authorColors:
+    "*": "#c9a45c"
+  branchColors:
+    main: "#e23d43"
+    master: "#e23d43"
