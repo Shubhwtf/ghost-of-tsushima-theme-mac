@@ -349,9 +349,105 @@ def scene_torii(c, rng):
     hanko(c, 300, 300, 150, "対馬", seed=3)
 
 
+# ------------------------------------------------------------------ Standoff
+def grass_field(c, rng, y0, y1, n, h0, h1, lean, col_far, col_near, tip_col=None, tip_amt=0.0, w0=1.5, w1=6.0):
+    """Thousands of wind-bent blades, small at the horizon and tall up front."""
+    bands = 6
+    for band in range(bands):
+        lo, hi = band / bands, (band + 1) / bands
+        blades, tips = [], []
+        for _ in range(n // bands):
+            t = rng.uniform(lo, hi)
+            y = y0 + (y1 - y0) * t ** 1.6
+            x = rng.uniform(-100, DW + 100)
+            h = (h0 + (h1 - h0) * t ** 1.8) * rng.uniform(0.6, 1.25)
+            ln = lean * rng.uniform(0.6, 1.3)
+            tx, ty = x + ln * h * 0.55, y - h
+            mx, my = x + ln * h * 0.08, y - h * 0.6
+            wd = w0 + (w1 - w0) * t
+            blades.append(f'<path d="M{x - wd / 2:.1f},{y:.1f} Q{mx:.1f},{my:.1f} {tx:.1f},{ty:.1f} Q{mx + wd * 0.3:.1f},{my:.1f} {x + wd / 2:.1f},{y:.1f}Z"/>')
+            if tip_col and rng.random() < 0.55:
+                tips.append(f'<path d="M{mx + (tx - mx) * 0.55:.1f},{my + (ty - my) * 0.55:.1f} L{tx:.1f},{ty:.1f}" '
+                            f'stroke="#fff" fill="none" stroke-width="{wd * 0.7:.1f}" stroke-linecap="round"/>')
+        tcol = (hex2f(col_far) * (1 - (lo + hi) / 2) + hex2f(col_near) * (lo + hi) / 2)
+        c.comp(c.svg_mask("".join(blades)), tcol)
+        if tips:
+            c.comp(c.svg_mask("".join(tips)), tip_col, tip_amt * (1 - lo * 0.6))
+
+
+def scene_standoff(c, rng):
+    """Two samurai face off in a wind-swept field at dusk; leaves ride the Guiding Wind."""
+    xs, ys = c.grid()
+    hz = 1420
+    c.img = c.vgrad([(0, "#140506"), (0.18, "#3a0b0d"), (0.38, "#8a1c16"), (0.52, "#c8461f"),
+                     (0.62, "#eb8a3a"), (0.66, "#f6c070"), (0.70, "#f3c57c"), (1, "#3a1608")])
+    sx, sy, sr = 1920, 1300, 300
+    c.screen(c.radial(sx, sy, 2200, 2.4), "#ffb860", 0.55)
+    c.screen(c.radial(sx, sy, 800, 2.0), "#fff0c8", 0.6)
+    sun = c.svg_mask(f'<circle cx="{sx}" cy="{sy}" r="{sr}"/>')
+    c.comp(c.blur(sun, 2), "#fff2d2", 0.95)
+    # long brushed cloud bands, dark against the glow
+    for i in range(9):
+        y = rng.uniform(180, 1150)
+        x0 = rng.uniform(-400, 2200)
+        L = rng.uniform(1200, 2600)
+        pts = catmull_pts([(x0, y), (x0 + L * 0.5, y - rng.uniform(-30, 30)), (x0 + L, y + rng.uniform(-20, 20))], 40)
+        m = c.brush(pts, rng.uniform(20, 70), seed=200 + i, bristles=70, dry=0.3, taper=(0.35, 0.45))
+        col = "#2a0a0a" if y < 700 else "#7a2414"
+        c.comp(c.blur(m, 3), col, 0.75 * (1 - y / 1800))
+    # distant hills in haze
+    r1 = ridge(21, hz - 20, 160, cells=5)
+    c.comp(below(c, r1), "#a04a2a", 0.55)
+    r2 = ridge(22, hz + 10, 90, cells=8)
+    c.comp(below(c, r2), "#5e2316", 0.85)
+    # the field
+    ground = below(c, lambda X: hz + 25 + 0 * np.asarray(X), 2)
+    c.img = c.img * (1 - ground[..., None]) + c.vgrad([(0, "#000000"), (0.66, "#c8782e"), (0.72, "#8a4518"), (1, "#1a0a05")]) * ground[..., None]
+    grass_field(c, rng, hz + 20, 1700, 9000, 10, 120, 1.0, "#b8692a", "#5a2a10", tip_col="#ffd28a", tip_amt=0.7, w0=1.2, w1=4)
+    # the duellists, backlit
+    left = F.samurai_profile(1430, 1690, 620, pose="iai", wind=0.25, seed=31)
+    right = F.samurai_profile(2440, 1695, 650, flip=True, pose="hasso", wind=1.2, seed=32)
+    for fg in (left, right):
+        fm = c.svg_mask(fg.svg())
+        c.screen(c.blur(fm, 10), "#ffb35a", 0.35)
+        c.comp(fm, "#120806")
+    # wind-swept foreground grass, darker and taller
+    grass_field(c, rng, 1680, DH + 120, 2600, 120, 760, 1.0, "#3a1a0a", "#0e0604", tip_col="#e8a050", tip_amt=0.55, w0=3, w1=12)
+    for x, h in [(120, 1100), (3700, 1000), (3420, 760)]:
+        grass_clump(c, x, DH + 60, h, 1.0, rng, "#0c0503", plume_col="#d8a868", n=10, width=0.7)
+    # the Guiding Wind: faint white trails with leaves riding them
+    trails = []
+    for i in range(6):
+        y0 = 2050 - i * 60 + rng.uniform(-40, 40)
+        pts = bez((-200, y0), (900, y0 - 900 + rng.uniform(-80, 80)), (2700, 1700 - i * 70), (4100, 450 + i * 90), 160)
+        a0, a1 = rng.uniform(0.05, 0.3), rng.uniform(0.55, 0.95)
+        trails.append((pts[int(a0 * 159):int(a1 * 159)], rng.uniform(2.5, 5)))
+    tm = np.zeros((c.h, c.w), np.float32)
+    for seg, wdt in trails:
+        tm = np.maximum(tm, c.brush(seg, wdt, seed=int(wdt * 100), bristles=6, dry=0.55, taper=(0.45, 0.5)))
+    c.screen(c.blur(tm, 2.5), "#fff4e0", 0.35)
+    lv = {C["lacquer"]: [], C["vermilion"]: [], C["gold"]: [], "#7a1010": []}
+    keys = list(lv)
+    for i in range(150):
+        seg, _ = trails[rng.randrange(len(trails))]
+        px, py = seg[rng.randrange(len(seg))]
+        px += rng.gauss(0, 90)
+        py += rng.gauss(0, 70)
+        if 1250 < px < 2650 and 1000 < py < 1720 and rng.random() < 0.7:
+            continue          # keep the duellists readable
+        sz = rng.uniform(16, 32)
+        kind = "maple" if rng.random() < 0.65 else "petal"
+        lv[keys[rng.randrange(4)]].append(f'<path d="{F.leaf_path(px, py, sz, rng.uniform(0, 6.28), kind)}"/>')
+    for col, paths in lv.items():
+        c.comp(c.svg_mask("".join(paths)), col)
+    near = "".join(f'<path d="{F.leaf_path(rng.choice([rng.uniform(150, 1000), rng.uniform(2900, 3700)]), rng.uniform(300, 2000), rng.uniform(45, 75), rng.uniform(0, 6.28), "maple")}"/>' for _ in range(5))
+    c.comp(c.blur(c.svg_mask(near), 6), C["lacquer"], 0.9)
+
+
 SCENES = {
     "Higanbana": ("Higanbana", scene_higanbana, 0.03, 0.45),
     "ToriiAtDawn": ("Torii at Dawn", scene_torii, 0.022, 0.25),
+    "Standoff": ("Standoff", scene_standoff, 0.03, 0.5),
 }
 
 
