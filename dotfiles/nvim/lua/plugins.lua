@@ -67,9 +67,10 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {
+    opts = function()
+      return {
       options = {
-        theme = "ghost-of-tsushima",
+        theme = vim.g.got_variant == "kurosawa" and "ghost-of-tsushima-kurosawa" or "ghost-of-tsushima",
         component_separators = { left = "\u{e0b9}", right = "\u{e0bb}" },
         section_separators = { left = "\u{e0b8}", right = "\u{e0be}" },
         globalstatus = true,
@@ -83,7 +84,8 @@ return {
         lualine_y = { "progress" },
         lualine_z = { { "location", icon = "\u{f04e5}" } },
       },
-    },
+      }
+    end,
   },
   {
     "akinsho/bufferline.nvim",
@@ -91,7 +93,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     event = "VeryLazy",
     opts = function()
-      local c = require("got.palette")
+      local c = require("got").palette
       return {
         options = {
           separator_style = "slant",
@@ -124,7 +126,7 @@ return {
     config = function()
       local alpha = require("alpha")
       local dash = require("alpha.themes.dashboard")
-      local art = require("got.enso")
+      local art = require(vim.g.got_variant == "kurosawa" and "got.enso_kurosawa" or "got.enso")
       dash.section.header = {
         type = "group",
         val = {

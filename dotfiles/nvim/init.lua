@@ -1,5 +1,9 @@
 -- 冥人 Ghost of Tsushima — Neovim
 -- https://github.com/Shubhwtf/ghost-of-tsushima-theme-mac
+-- "red" (default) or "kurosawa" for the black-and-white mode; install.sh --variant sets this
+vim.g.got_variant = vim.g.got_variant or "red"
+local scheme = vim.g.got_variant == "kurosawa" and "ghost-of-tsushima-kurosawa" or "ghost-of-tsushima"
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
@@ -47,12 +51,12 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 require("lazy").setup("plugins", {
-  install = { colorscheme = { "ghost-of-tsushima" } },
+  install = { colorscheme = { scheme } },
   ui = { border = "rounded", title = " \u{25c6} 冥人 " },
   change_detection = { notify = false },
 })
 
-vim.cmd.colorscheme("ghost-of-tsushima")
+vim.cmd.colorscheme(scheme)
 
 local map = vim.keymap.set
 map("n", "<C-p>", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
