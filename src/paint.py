@@ -274,7 +274,19 @@ class Canvas:
         a = np.asarray(im, np.float32) / 255
         return gblur(a, 0.6 * max(1, k))
 
-    def finish(self, grain=0.035, vignette=0.4, seed=0, warm=None):
+    def bw_grade(self, mix=(0.5, 0.38, 0.12), contrast=6.0, clarity=0.3, halation=0.16, lift=0.025):
+        """Black-and-white film grade (Kurosawa mode): a red-filter channel mix,
+        local contrast, a filmic S-curve with a lifted base, and highlight halation."""
+        y = (self.img * np.array(mix, np.float32)).sum(axis=2)
+        y = y + clarity * (y - self.blur(y, 40))                 # local contrast
+        s = lambda v: 1 / (1 + np.exp(-contrast * (v - 0.5)))
+        y = (s(np.clip(y, 0, 1)) - s(0.0)) / (s(1.0) - s(0.0))    # S-curve, ends pinned
+        hi = np.clip((y - 0.72) / 0.28, 0, 1) ** 2
+        y = y + halation * self.blur(hi, 26)                     # bloom around highlights
+        y = lift + (1 - lift - 0.015) * np.clip(y, 0, 1)         # film base and shoulder
+        self.img = np.repeat(y[..., None], 3, axis=2).astype(np.float32)
+
+    def finish(self, grain=0.035, vignette=0.4, seed=0, warm=None, mono=False):
         """Vignette, film grain and dithered 8-bit output -> PIL image."""
         img = self.img
         xs, ys = self.grid()
@@ -290,5 +302,8 @@ class Canvas:
         amt = grain * (0.35 + 1.3 * np.sqrt(np.clip(lum * (1.1 - lum), 0, 1)))
         img = img + (g * amt)[..., None]
         img = np.clip(img, 0, 1) * 255
+        if mono:   # one channel: no dither or compression can introduce a hue
+            y = img.mean(axis=2) + rng.random(img.shape[:2], dtype=np.float32) - 0.5
+            return Image.fromarray(np.clip(y + 0.5, 0, 255).astype(np.uint8), "L")
         img = img + rng.random(img.shape, dtype=np.float32) - 0.5   # dither
         return Image.fromarray(np.clip(img + 0.5, 0, 255).astype(np.uint8))
