@@ -196,12 +196,162 @@ def scene_higanbana(c, rng):
                     C["lacquer"], C["vermilion"], blur=3.5)
 
     # petals riding the wind (right to left), a few close and soft
-    c.comp(c.svg_mask(petals_svg(rng, 240, (0, 250, DW, 1800), 19)), C["crimson"], 0.95)
-    c.comp(c.blur(c.svg_mask(petals_svg(rng, 30, (0, 150, DW, 1900), 34)), 6), C["lacquer"], 0.9)
+    stream = bez((3900, 1650), (2900, 1250), (1500, 1100), (-100, 450), 200)
+    near, far_ = [], []
+    for i in range(120):
+        px, py = stream[rng.randrange(200)]
+        px += rng.gauss(0, 170)
+        py += rng.gauss(0, 120)
+        sz = rng.uniform(9, 22)
+        far_.append(f'<path d="{F.leaf_path(px, py, sz, rng.uniform(-0.9, 0.6), "petal")}"/>')
+    for i in range(14):
+        px, py = stream[rng.randrange(200)]
+        near.append(f'<path d="{F.leaf_path(px + rng.gauss(0, 300), py + rng.gauss(0, 250), rng.uniform(26, 40), rng.uniform(-0.9, 0.6), "petal")}"/>')
+    c.comp(c.svg_mask("".join(far_)), C["crimson"], 0.95)
+    c.comp(c.blur(c.svg_mask("".join(near)), 5), C["lacquer"], 0.9)
+
+
+# ------------------------------------------------------------------ shared ink pieces
+def washi(c, seed, base="#ece6dc", warm=0.0):
+    """Washi paper: soft cloudy density plus fine fibres."""
+    xs, ys = c.grid()
+    c.img[:] = hex2f(base)
+    cloud = c.noise(4, 6, seed, stretch=1.3)
+    c.img *= (0.965 + 0.06 * cloud)[..., None]
+    rng = random.Random(seed)
+    fib = []
+    for _ in range(2600):
+        x, y = rng.uniform(0, DW), rng.uniform(0, DH)
+        a = rng.uniform(0, math.pi)
+        L = rng.uniform(10, 60)
+        fib.append(f'<path d="M{x:.0f},{y:.0f} q{math.cos(a) * L / 2 + rng.uniform(-6, 6):.0f},{math.sin(a) * L / 2:.0f} '
+                   f'{math.cos(a) * L:.0f},{math.sin(a) * L:.0f}"/>')
+    m = c.svg_mask('<g fill="none" stroke="#fff" stroke-width="1.6">' + "".join(fib) + "</g>")
+    c.comp(m, "#c9bfae", 0.25)
+    c.screen(c.radial(DW / 2, DH * 0.45, 2600, 1.5), "#fffaf0", 0.25 + warm)
+
+
+def hanko(c, x, y, size, text, color=None, font="ShipporiMincho", rot=0.0, seed=1):
+    """Red seal: square with uneven, worn edges and carved white characters."""
+    color = color or C["lacquer"]
+    h = size / 2
+    sq = (f'<rect x="{x - h:.1f}" y="{y - h:.1f}" width="{size:.1f}" height="{size:.1f}" rx="{size * 0.06:.1f}" '
+          f'transform="rotate({rot} {x} {y})"/>')
+    chars = list(text)
+    if len(chars) == 2:
+        g = glyphs.text_svg(text, x, y - size * 0.40, size * 0.40, font, vertical=True, spacing=0.02)
+    else:
+        g = glyphs.text_svg(text, x, y + size * 0.22, size * 0.62, font)
+    seal = c.svg_mask(sq)
+    carve = c.svg_mask(f'<g transform="rotate({rot} {x} {y})"><rect x="{x - h * 0.84:.1f}" y="{y - h * 0.84:.1f}" '
+                       f'width="{size * 0.84:.1f}" height="{size * 0.84:.1f}" fill="none" stroke="#fff" '
+                       f'stroke-width="{size * 0.035:.1f}"/>{g}</g>')
+    wear = c.noise(40, 4, seed + 900)
+    ink = seal * (1 - carve) * np.clip(1.25 - 0.9 * smoothstep(0.55, 0.85, wear), 0, 1)
+    c.comp(ink, color, 0.95)
+    return ink
+
+
+def pine(c, x, y, h, seed, color="#141212", lean=1.0):
+    """Sumi-e black pine: a twisting trunk and flat cloud-like needle pads."""
+    rng = random.Random(seed)
+    trunk = catmull_pts([(x, y), (x + 30 * lean, y - h * 0.3), (x - 20 * lean, y - h * 0.55),
+                         (x + 60 * lean, y - h * 0.8), (x + 40 * lean, y - h)], 30)
+    m = c.brush(trunk, h * 0.06, seed=seed, bristles=60, dry=0.35, taper=(0.02, 0.4), ink_decay=0.2)
+    pads = []
+    for i in range(7):
+        t = 0.35 + 0.65 * i / 6
+        px, py = trunk[int(t * (len(trunk) - 1))]
+        side = 1 if i % 2 else -1
+        bx = px + side * rng.uniform(0.15, 0.4) * h
+        by = py - rng.uniform(0, 0.05) * h
+        pads.append(f'<path d="M{px:.0f},{py:.0f} Q{(px + bx) / 2:.0f},{py - 20:.0f} {bx:.0f},{by:.0f}" fill="none" '
+                    f'stroke="#fff" stroke-width="{h * 0.015:.0f}"/>')
+        for j in range(9):
+            cx = bx + rng.uniform(-0.13, 0.13) * h
+            cy = by + rng.uniform(-0.035, 0.015) * h
+            r = h * rng.uniform(0.035, 0.06)
+            for q in range(26):
+                ang = math.pi * (1.05 + 0.9 * q / 25) + rng.uniform(-0.04, 0.04)
+                L = r * rng.uniform(0.75, 1.0)
+                pads.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{cx + math.cos(ang) * L:.1f}" '
+                            f'y2="{cy + math.sin(ang) * L * 0.8:.1f}" stroke="#fff" stroke-width="{h * 0.0045:.1f}"/>')
+    pm = c.svg_mask("".join(pads))
+    tex = c.noise(80, 3, seed + 3)
+    c.comp(np.maximum(m, pm * (0.8 + 0.2 * tex)), color)
+
+
+def grass_clump(c, x, base, h, lean, rng, color, plume_col=None, n=9, width=1.0):
+    strokes = []
+    for i in range(n):
+        hx = x + rng.uniform(-0.12, 0.12) * h
+        hh = h * rng.uniform(0.65, 1.1)
+        ln = lean * rng.uniform(0.7, 1.3)
+        strokes.extend((pts, w * width, j == 0) for j, (pts, w) in enumerate(F.pampas(hx, base, hh, ln, rng)))
+    stems = np.zeros((c.h, c.w), np.float32)
+    plumes = np.zeros((c.h, c.w), np.float32)
+    seg = []
+    for pts, w, is_stem in strokes:
+        d = "M" + " L".join(f"{px:.1f},{py:.1f}" for px, py in pts)
+        seg.append((d, w, is_stem))
+    sm = c.svg_mask('<g fill="none" stroke="#fff" stroke-linecap="round">' +
+                    "".join(f'<path d="{d}" stroke-width="{w:.1f}"/>' for d, w, st in seg if st) + "</g>")
+    pm = c.svg_mask('<g fill="none" stroke="#fff" stroke-linecap="round">' +
+                    "".join(f'<path d="{d}" stroke-width="{w:.1f}"/>' for d, w, st in seg if not st) + "</g>")
+    c.comp(sm, color)
+    c.comp(c.blur(pm, 1.2), plume_col or color, 0.9)
+
+
+# ------------------------------------------------------------------ Torii at Dawn
+def scene_torii(c, rng):
+    """Sumi-e dawn: ink-wash mountains, a red sun, a torii on the ridge, pampas grass."""
+    xs, ys = c.grid()
+    washi(c, 5)
+    # red sun disc, stamped (slightly uneven)
+    sx, sy, sr = 2620, 690, 300
+    sun = c.svg_mask(f'<circle cx="{sx}" cy="{sy}" r="{sr}"/>')
+    t = c.noise(30, 4, 61)
+    c.comp(c.blur(sun, 1.5) * (0.86 + 0.14 * t), C["lacquer"], 0.95)
+    c.screen(c.radial(sx, sy, 900, 2.5), "#f4c9a8", 0.25)
+    # far peaks: pale ink, tall and pointed, dissolving downward
+    layers = [(11, 1150, 560, 4, 1.7, "#b9b1a6", 420), (12, 1330, 520, 5, 1.6, "#978e85", 330),
+              (13, 1520, 420, 6, 1.4, "#6d6560", 260), (14, 1700, 300, 7, 1.3, "#3e3835", 220)]
+    for i, (seed, base, amp, cells, sharp, col, fade) in enumerate(layers):
+        r = ridge(seed, base, amp, cells=cells, sharp=sharp)
+        c.comp(wash(c, r, fade, seed + 100, rough=0.5), col, 0.9)
+        m = c.noise(4 + i, 5, seed + 200, stretch=6.0)
+        band = np.exp(-((ys - (base + 40)) / 110) ** 2) * smoothstep(0.35, 0.75, m)
+        c.comp(band, "#f3eee4", 0.85)
+    # the near hill and the torii on its crest
+    hill = lambda X: 1600 + 0.00055 * (np.asarray(X) - 2950) ** 2 + 14 * np.sin(np.asarray(X) / 140)
+    c.comp(wash(c, hill, 420, 77, rough=0.6), "#1d1a19", 1.0)
+    edge = catmull_pts([(2050, float(hill(2050))), (2500, float(hill(2500))), (2950, float(hill(2950)) - 4),
+                        (3400, float(hill(3400))), (3900, float(hill(3900)))], 40)
+    c.comp(c.brush(edge, 26, seed=78, bristles=60, dry=0.45, taper=(0.4, 0.2)), "#141212", 0.9)
+    tx = 2900
+    tb = float(hill(tx)) + 10
+    c.comp(c.svg_mask(F.torii(tx, tb, 360)), "#0e0c0c")
+    pine(c, 3420, float(hill(3420)) + 14, 560, seed=8, color="#0e0c0c", lean=-1)
+    # mist rolling at the foot of the hill
+    mist = c.noise(5, 6, 88, stretch=5.0)
+    c.comp(np.exp(-((ys - 1880) / 160) ** 2) * smoothstep(0.3, 0.8, mist), "#ece6dc", 0.9)
+    # birds heading for the sun
+    birds = []
+    for i in range(7):
+        bx, by, bs = 1900 + i * 70 + rng.uniform(-30, 30), 520 + abs(i - 3) * 38 + rng.uniform(-10, 10), rng.uniform(12, 18)
+        birds.append(f'<path d="M{bx - bs:.0f},{by - bs * 0.2:.0f} Q{bx - bs * 0.4:.0f},{by - bs * 0.6:.0f} {bx:.0f},{by:.0f} '
+                     f'Q{bx + bs * 0.4:.0f},{by - bs * 0.6:.0f} {bx + bs:.0f},{by - bs * 0.2:.0f}" fill="none" stroke="#fff" stroke-width="3.5"/>')
+    c.comp(c.svg_mask("".join(birds)), "#2a2523")
+    # pampas grass in the foreground, leaning with the wind
+    for x, h, n in [(160, 900, 12), (520, 700, 9), (820, 520, 7), (3600, 760, 10), (3820, 980, 12)]:
+        grass_clump(c, x, DH + 40, h, -1.0, rng, "#1a1716", plume_col="#8f8170", n=n, width=0.6)
+    # signature seal
+    hanko(c, 300, 300, 150, "対馬", seed=3)
 
 
 SCENES = {
     "Higanbana": ("Higanbana", scene_higanbana, 0.03, 0.45),
+    "ToriiAtDawn": ("Torii at Dawn", scene_torii, 0.022, 0.25),
 }
 
 
