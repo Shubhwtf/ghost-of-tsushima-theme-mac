@@ -332,12 +332,14 @@ def leaf_path(x, y, size, angle, kind="maple"):
         lobes = [(-2.3, 0.5), (-1.55, 0.78), (-0.78, 0.95), (0.0, 1.0), (0.78, 0.95), (1.55, 0.78), (2.3, 0.5)]
         for i, (a, r) in enumerate(lobes):
             a -= math.pi / 2
-            pts.append((math.cos(a - 0.2) * r * size * 0.45, math.sin(a - 0.2) * r * size * 0.45))
+            pts.append((math.cos(a - 0.3) * r * size * 0.55, math.sin(a - 0.3) * r * size * 0.55))
+            pts.append((math.cos(a - 0.07) * r * size * 0.86, math.sin(a - 0.07) * r * size * 0.86))
             pts.append((math.cos(a) * r * size, math.sin(a) * r * size))
-            pts.append((math.cos(a + 0.2) * r * size * 0.45, math.sin(a + 0.2) * r * size * 0.45))
+            pts.append((math.cos(a + 0.07) * r * size * 0.86, math.sin(a + 0.07) * r * size * 0.86))
+            pts.append((math.cos(a + 0.3) * r * size * 0.55, math.sin(a + 0.3) * r * size * 0.55))
             if i < len(lobes) - 1:
                 na = (a + lobes[i + 1][0] - math.pi / 2) / 2
-                pts.append((math.cos(na) * size * 0.22, math.sin(na) * size * 0.22))
+                pts.append((math.cos(na) * size * 0.3, math.sin(na) * size * 0.3))
         pts += [(size * 0.04, size * 0.12), (size * 0.05, size * 0.55), (-size * 0.02, size * 0.55), (-size * 0.04, size * 0.12)]
         pts = [(px * math.cos(angle) - py * math.sin(angle) + x, px * math.sin(angle) + py * math.cos(angle) + y)
                for px, py in pts]
