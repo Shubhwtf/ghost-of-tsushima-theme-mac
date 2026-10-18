@@ -1,0 +1,6 @@
+/build/
+/wallpapers/
+__pycache__/
+*.pyc
+*.tmp
+.DS_Store
