@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # 冥人 Ghost of Tsushima — macOS appearance
 #
-# usage: macos/defaults.sh [--extras] [--backup DIR]
+# usage: macos/defaults.sh [--variant red|kurosawa] [--extras] [--backup DIR]
 #
 #   (no option)  dark mode, red accent colour, red text highlight
+#   --variant V  kurosawa: graphite accent, graphite window buttons, gray highlight
 #   --extras     also tidy the Dock and Finder (each tweak listed below)
 #   --backup DIR where to write restore-defaults.sh (default ~/.got-backup-<timestamp>)
 #
@@ -17,16 +18,19 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
 fi
 
 EXTRAS=0
+VARIANT="red"
 BACKUP="$HOME/.got-backup-$(date +%Y%m%d-%H%M%S)"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --extras) EXTRAS=1 ;;
+    --variant) VARIANT="${2:-}"; shift ;;
     --backup) BACKUP="$2"; shift ;;
-    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 1 ;;
   esac
   shift
 done
+case "$VARIANT" in red|kurosawa) ;; *) echo "unknown variant: $VARIANT (use red or kurosawa)" >&2; exit 1 ;; esac
 
 mkdir -p "$BACKUP"
 RESTORE="$BACKUP/restore-defaults.sh"
@@ -48,6 +52,8 @@ set_default() {
 }
 
 red=$'\e[38;2;225;61;67m'; dim=$'\e[38;2;131;122;115m'; off=$'\e[0m'
+[[ "$VARIANT" == kurosawa ]] && { red=$'\e[38;2;245;245;245m'; dim=$'\e[38;2;128;128;128m'; }
+[[ -t 1 ]] || { red=""; dim=""; off=""; }
 say() { printf '%s◆%s %s\n' "$red" "$off" "$*"; }
 
 # ---- appearance ----------------------------------------------------------------
@@ -56,12 +62,23 @@ say "Dark mode"
 set_default -g AppleInterfaceStyle -string Dark
 osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true' >/dev/null 2>&1 || true
 
-say "Accent colour: red"
-# -1 graphite, 0 red, 1 orange, 2 yellow, 3 green, 4 blue (default = key absent), 5 purple, 6 pink
-set_default -g AppleAccentColor -int 0
+# AppleAccentColor: -1 graphite, 0 red, 1 orange, 2 yellow, 3 green, 4 blue (default = key absent), 5 purple, 6 pink
+# AppleAquaColorVariant: 1 colour window buttons and controls, 6 graphite
+if [[ "$VARIANT" == kurosawa ]]; then
+  say "Accent colour: graphite (window buttons too)"
+  set_default -g AppleAccentColor -int -1
+  set_default -g AppleAquaColorVariant -int 6
 
-say "Text highlight colour: red"
-set_default -g AppleHighlightColor -string "1.000000 0.733333 0.721569 Red"
+  say "Text highlight colour: neutral gray"
+  set_default -g AppleHighlightColor -string "0.752941 0.752941 0.752941 Other"
+else
+  say "Accent colour: red"
+  set_default -g AppleAccentColor -int 0
+  set_default -g AppleAquaColorVariant -int 1
+
+  say "Text highlight colour: red"
+  set_default -g AppleHighlightColor -string "1.000000 0.733333 0.721569 Red"
+fi
 
 # Sidebar icons follow the accent colour; medium size suits the bar font.
 set_default -g NSTableViewDefaultSizeMode -int 2
