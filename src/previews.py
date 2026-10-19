@@ -3,17 +3,15 @@
 the bar's real colours and items, macOS window chrome with traffic lights and
 JankyBorders outlines, and live terminal captures composited in.
 
-usage: [GOT_VARIANT=kurosawa] previews.py CAPS_DIR WALL_DIR OUT_DIR [FAN_DIR]
+usage: [GOT_VARIANT=kurosawa] previews.py CAPS_DIR OUT_DIR [FAN_DIR]
 
-CAPS_DIR  PNG captures: fetch, code, dashboard, telescope, btop
-          (Kurosawa: fetch, code, dashboard, btop; plus *_tile versions for the tiled layout)
-WALL_DIR  wallpapers rendered at 2880x1800 (GhostOfTsushima-<Scene>-2880x1800.jpg,
-          or GhostOfTsushima-<Scene>-BW-2880x1800.jpg for Kurosawa)
-FAN_DIR   optional wallhaven downloads (wallhaven-<id>.*) for the fan-art previews
+CAPS_DIR  PNG captures: fetch, code, dashboard, btop, plus *_tile versions for the tiled layout
+FAN_DIR   wallhaven downloads (wallhaven-<id>.*) from scripts/wallpapers.py: the theme is
+          composited onto real Ghost of Tsushima art (red variant)
 
-With GOT_VARIANT=kurosawa the bar, window chrome and borders use the Kurosawa
-palette (graphite window buttons, as macos/defaults.sh sets them) and the
-previews are written as kurosawa-*.jpg.
+Every preview uses real wallpapers or none at all. Without FAN_DIR, and always for
+Kurosawa (kurosawa-*.jpg, graphite window buttons as macos/defaults.sh sets them),
+the captures are framed as plain macOS windows on ink.
 """
 import os
 import subprocess
@@ -187,114 +185,46 @@ def tiled(wall, main, side1, side2, app="nvim"):
     return img
 
 
-def kurosawa(caps, walls, out):
-    """The Kurosawa previews: the same layouts on the black-and-white scenes."""
-    global CLOCK
-    CLOCK = "Mon 19 Oct  09:41"
-    cap = {k: Image.open(os.path.join(caps, f"{k}.png")) for k in ("fetch", "code", "dashboard", "btop")}
-    for k in ("code", "fetch", "btop"):
-        p = os.path.join(caps, f"{k}_tile.png")
-        cap[f"{k}_tile"] = Image.open(p) if os.path.exists(p) else cap[k]
-    wall = lambda k: os.path.join(walls, f"GhostOfTsushima-{k}-BW-2880x1800.jpg")
-    name = lambda k: os.path.join(out, f"kurosawa-{k}.jpg")
-
-    # hero: Higanbana in black and white, kitty with fastfetch floating on the left
-    fw = 1240
-    fh = int(fw * 1400 / 1900) + 28 * PT
-    save(floating(wall("Higanbana"), cap["fetch"], (150, 250, fw, fh), "jin@tsushima: ~/code/guiding-wind", "kitty"),
-         name("hero"))
-    # tiled: Neovim, fastfetch and btop in the rain
-    save(tiled(wall("Kurosawa"), cap["code_tile"], cap["fetch_tile"], cap["btop_tile"]), name("tiled"))
-    # the ensō dashboard on the Guiding Wind
-    dw = 1500
-    dh = int(dw * 1600 / 2000) + 28 * PT
-    save(floating(wall("GuidingWind"), cap["dashboard"], ((W - dw) // 2 - 260, (H - dh) // 2 + 40, dw, dh), "nvim", "nvim"),
-         name("dashboard"))
-    # code with neo-tree on the light Torii at Dawn
-    cw = 1900
-    ch = int(cw * 1400 / 2400) + 28 * PT
-    save(floating(wall("ToriiAtDawn"), cap["code"], (110, H - ch - 110, cw, ch), "nvim  src/wind.ts", "nvim"), name("code"))
-    # btop in the Standoff
-    bw = 1700
-    bh = int(bw * 1400 / 2200) + 28 * PT
-    save(floating(wall("Standoff"), cap["btop"], ((W - bw) // 2, 330, bw, bh), "btop", "btop"), name("btop"))
-    # the plain terminal shot, on ink
-    c = cap["fetch"]
-    ww = 1600
-    hh = int(ww * c.height / c.width) + 28 * PT
+def framed(cap, title, path, ww=1600):
+    """A capture as a plain macOS window on ink: no wallpaper behind it."""
+    hh = int(ww * cap.height / cap.width) + 28 * PT
     canvas = Image.new("RGBA", (ww + 160, hh + 160), rgba("ink"))
-    window(canvas, c, (80, 70, ww, hh), title="kitty")
-    save(canvas, name("term-fetch"), w=1600)
+    window(canvas, cap, (80, 70, ww, hh), title=title)
+    save(canvas, path, w=ww)
 
 
 def main():
-    caps, walls, out = sys.argv[1:4]
-    if KUROSAWA:
-        os.makedirs(out, exist_ok=True)
-        kurosawa(caps, walls, out)
-        return
-    fan = sys.argv[4] if len(sys.argv) > 4 else None
+    caps, out = sys.argv[1:3]
+    fan = sys.argv[3] if len(sys.argv) > 3 else None
     os.makedirs(out, exist_ok=True)
-    cap = {k: Image.open(os.path.join(caps, f"{k}.png")) for k in ("fetch", "code", "dashboard", "telescope", "btop")}
-    # tile-sized captures for the tiled layouts (fall back to the big ones)
+    cap = {k: Image.open(os.path.join(caps, f"{k}.png")) for k in ("fetch", "code", "dashboard", "btop")}
+    # tile-sized captures for the tiled layout (fall back to the big ones)
     for k in ("code", "fetch", "btop"):
         p = os.path.join(caps, f"{k}_tile.png")
         cap[f"{k}_tile"] = Image.open(p) if os.path.exists(p) else cap[k]
-    wall = lambda k: os.path.join(walls, f"GhostOfTsushima-{k}-2880x1800.jpg")
 
-    # hero: Higanbana, kitty with fastfetch floating on the left
+    if KUROSAWA:
+        cap["dashboard"] = cap["dashboard"].crop((0, 0, cap["dashboard"].width, int(cap["dashboard"].height * 0.78)))
+        for k, title in (("fetch", "kitty"), ("code", "nvim  src/wind.ts"), ("dashboard", "nvim"), ("btop", "btop")):
+            framed(cap[k], title, os.path.join(out, f"kurosawa-{'term-fetch' if k == 'fetch' else k}.jpg"))
+        return
+
+    framed(cap["fetch"], "kitty", os.path.join(out, "term-fetch.jpg"))
+    if not (fan and os.path.isdir(fan)):
+        return
+    files = {f.split("-")[1].split(".")[0]: os.path.join(fan, f) for f in os.listdir(fan) if f.startswith("wallhaven-")}
     fw = 1240
     fh = int(fw * 1400 / 1900) + 28 * PT
-    save(floating(wall("Higanbana"), cap["fetch"], (150, 250, fw, fh), "jin@tsushima: ~/code/guiding-wind", "kitty"),
-         os.path.join(out, "hero.jpg"))
-    # tiled rice: Kurosawa with nvim, fastfetch and btop
-    save(tiled(wall("Kurosawa"), cap["code_tile"], cap["fetch_tile"], cap["btop_tile"]), os.path.join(out, "tiled.jpg"))
-    # nvim dashboard on the Guiding Wind
     dw = 1500
     dh = int(dw * 1600 / 2000) + 28 * PT
-    save(floating(wall("GuidingWind"), cap["dashboard"], ((W - dw) // 2 - 260, (H - dh) // 2 + 40, dw, dh), "nvim", "nvim"),
-         os.path.join(out, "dashboard.jpg"))
-    # telescope on the light Torii at Dawn
-    tw = 1900
-    th = int(tw * 1400 / 2400) + 28 * PT
-    save(floating(wall("ToriiAtDawn"), cap["telescope"], (110, H - th - 110, tw, th), "nvim  Telescope", "nvim"),
-         os.path.join(out, "telescope.jpg"))
-    # btop in the Standoff dusk
-    bw = 1700
-    bh = int(bw * 1400 / 2200) + 28 * PT
-    save(floating(wall("Standoff"), cap["btop"], ((W - bw) // 2, 330, bw, bh), "btop", "btop"), os.path.join(out, "btop.jpg"))
-
-    if fan and os.path.isdir(fan):
-        files = {f.split("-")[1].split(".")[0]: os.path.join(fan, f) for f in os.listdir(fan) if f.startswith("wallhaven-")}
-        if "e7vgml" in files:
-            save(tiled(files["e7vgml"], cap["code_tile"], cap["fetch_tile"], cap["btop_tile"]), os.path.join(out, "fan-tiled.jpg"))
-        if "rdpd9w" in files:
-            save(floating(files["rdpd9w"], cap["fetch"], (W - fw - 170, 230, fw, fh), "jin@tsushima: ~/code/guiding-wind", "kitty"),
-                 os.path.join(out, "fan-fetch.jpg"))
-        if "g72wqd" in files:
-            save(floating(files["g72wqd"], cap["dashboard"], (W - dw - 140, (H - dh) // 2 + 40, dw, dh), "nvim", "nvim"),
-                 os.path.join(out, "fan-dashboard.jpg"))
-
-    # grid of the original wallpapers
-    keys = ["Higanbana", "ToriiAtDawn", "Standoff", "Kurosawa", "GuidingWind", "GuidingWindPaper"]
-    tw2, th2, g = 1200, 750, 16
-    grid = Image.new("RGB", (3 * tw2 + 4 * g, 2 * th2 + 3 * g), rgb(C["ink"]))
-    for i, k in enumerate(keys):
-        p = wall(k)
-        if os.path.exists(p):
-            im = Image.open(p).convert("RGB").resize((tw2, th2), Image.LANCZOS)
-            grid.paste(im, (g + (i % 3) * (tw2 + g), g + (i // 3) * (th2 + g)))
-    grid.save(os.path.join(out, "wallpapers.jpg"), quality=86, optimize=True, progressive=True)
-    print("wrote wallpapers.jpg")
-
-    # plain terminal shots for the gallery (just the window, on ink)
-    for k, title in (("fetch", "kitty"),):
-        c = cap[k]
-        ww = 1600
-        hh = int(ww * c.height / c.width) + 28 * PT
-        canvas = Image.new("RGBA", (ww + 160, hh + 160), rgba("ink"))
-        window(canvas, c, (80, 70, ww, hh), title=title)
-        save(canvas, os.path.join(out, f"term-{k}.jpg"), w=1600)
+    if "e7vgml" in files:
+        save(tiled(files["e7vgml"], cap["code_tile"], cap["fetch_tile"], cap["btop_tile"]), os.path.join(out, "fan-tiled.jpg"))
+    if "rdpd9w" in files:
+        save(floating(files["rdpd9w"], cap["fetch"], (W - fw - 170, 230, fw, fh), "jin@tsushima: ~/code/guiding-wind", "kitty"),
+             os.path.join(out, "fan-fetch.jpg"))
+    if "g72wqd" in files:
+        save(floating(files["g72wqd"], cap["dashboard"], (W - dw - 140, (H - dh) // 2 + 40, dw, dh), "nvim", "nvim"),
+             os.path.join(out, "fan-dashboard.jpg"))
 
 
 if __name__ == "__main__":
