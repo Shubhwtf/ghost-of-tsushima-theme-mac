@@ -10,9 +10,9 @@
 Sumi-e ink, washi paper, lacquer red and gold leaf, carried through your whole Mac:
 terminals, prompt, editor, menu bar, window borders and six wallpapers painted entirely from code.
 
-![Higanbana desktop with kitty and fastfetch](assets/screenshots/hero.jpg)
+![Tiled desktop: Neovim, fastfetch and btop on a red spider lily landscape](assets/screenshots/fan-tiled.jpg)
 
-<sub>Preview render: terminals captured live in kitty, macOS chrome and the SketchyBar bar composited from the configs' own colours.</sub>
+<sub>Preview render (terminal captured live, macOS chrome composited). Wallpaper: [wallhaven e7vgml](https://wallhaven.cc/w/e7vgml), uploaded by [HKkkkkkkkk](https://wallhaven.cc/user/HKkkkkkkkk) (no source given)</sub>
 
 </div>
 
@@ -40,62 +40,49 @@ Every colour comes from one file, [`palette.json`](palette.json). The configs ar
 
 ## Screenshots
 
-![Tiled: Neovim, fastfetch and btop on the Kurosawa wallpaper](assets/screenshots/tiled.jpg)
-<p align="center"><sub>Neovim with neo-tree, bufferline and lualine; fastfetch; btop. Wallpaper: <i>Kurosawa</i></sub></p>
+![fastfetch in kitty on a black-and-white pier](assets/screenshots/fan-fetch.jpg)
+<sub>Wallpaper: [wallhaven rdpd9w](https://wallhaven.cc/w/rdpd9w), uploaded by [Hellsingexe](https://wallhaven.cc/user/Hellsingexe) (no source given)</sub>
 
-<table>
-<tr>
-<td><img src="assets/screenshots/dashboard.jpg" alt="Neovim ensō dashboard on the Guiding Wind wallpaper"/></td>
-<td><img src="assets/screenshots/telescope.jpg" alt="Telescope on the Torii at Dawn wallpaper"/></td>
-</tr>
-<tr>
-<td align="center"><sub>The ensō dashboard. <i>Guiding Wind</i></sub></td>
-<td align="center"><sub>Telescope. <i>Torii at Dawn</i></sub></td>
-</tr>
-<tr>
-<td><img src="assets/screenshots/btop.jpg" alt="btop on the Standoff wallpaper"/></td>
-<td><img src="assets/screenshots/term-fetch.jpg" alt="The starship prompt and fastfetch in kitty"/></td>
-</tr>
-<tr>
-<td align="center"><sub>btop watching the wallpapers render. <i>Standoff</i></sub></td>
-<td align="center"><sub>starship, fastfetch, eza and zsh highlighting in kitty</sub></td>
-</tr>
-</table>
+![The Neovim ensō dashboard on official key art](assets/screenshots/fan-dashboard.jpg)
+<sub>Wallpaper: [wallhaven g72wqd](https://wallhaven.cc/w/g72wqd), official art via [Sucker Punch Productions](https://www.suckerpunch.com/category/game/ghostoftsushima/), uploaded by [Konozettoda](https://wallhaven.cc/user/Konozettoda)</sub>
+
+![The starship prompt and fastfetch in kitty](assets/screenshots/term-fetch.jpg)
+<p align="center"><sub>starship, fastfetch, eza and zsh highlighting in kitty</sub></p>
+
+All rights to this artwork belong to its artists and to Sucker Punch Productions / Sony Interactive Entertainment. It is not part of this repository. If one of these is yours and you would like it credited differently or removed, please open an issue.
 
 <details>
 <summary><b>How these were made</b></summary>
 
-These are **preview renders (terminal captured live, macOS chrome composited)**. Every terminal frame is a real capture of kitty running the theme's own configs, starship, fastfetch, Neovim and btop. The same goes for the Kurosawa previews below, captured with the Kurosawa configs. The captures ran in a sandbox with a throwaway home, user and hostname, so no personal details appear. The macOS parts (menu bar, window chrome, traffic lights, borders) are drawn by [`src/previews.py`](src/previews.py) from the same colours and items as the SketchyBar and JankyBorders configs.
+These are **preview renders (terminal captured live, macOS chrome composited)**. Every terminal frame is a real capture of kitty running the theme's own configs, starship, fastfetch, Neovim and btop. The same goes for the Kurosawa shots below, captured with the Kurosawa configs. The wallpapers are real Ghost of Tsushima art from wallhaven, credited under each image. The captures ran in a sandbox with a throwaway home, user and hostname, so no personal details appear. The macOS parts (menu bar, window chrome, traffic lights, borders) are drawn by [`src/previews.py`](src/previews.py) from the same colours and items as the SketchyBar and JankyBorders configs.
 </details>
 
 ## Kurosawa mode (black & white)
 
-![Kurosawa mode: fastfetch in kitty on the black-and-white Higanbana](assets/screenshots/kurosawa-hero.jpg)
+![Kurosawa mode: starship and fastfetch in kitty](assets/screenshots/kurosawa-term-fetch.jpg)
 
-<sub>Preview render (terminal captured live, macOS chrome composited): kitty with the Kurosawa configs. Wallpaper: <i>Higanbana</i>, black and white.</sub>
+<sub>Terminal captured live in kitty with the Kurosawa configs; window chrome composited.</sub>
 
 A second variant, named after the game's Kurosawa film mode, takes all the colour out. Every component (terminals, prompt, Neovim, btop, the menu bar, borders, the emblem and the wallpapers) is pure grayscale, and meaning moves into lightness, weight and slant instead: keywords are bold, types italic, deletions struck through, and the 16 ANSI greys sit on an even lightness ramp so each one stays distinguishable. On macOS it switches the accent and the window buttons to graphite, so no hue survives anywhere on screen.
 
 <table>
 <tr>
-<td><img src="assets/screenshots/kurosawa-tiled.jpg" alt="Kurosawa mode, tiled: Neovim, fastfetch and btop"/></td>
-<td><img src="assets/screenshots/kurosawa-code.jpg" alt="Kurosawa mode: Neovim with neo-tree on Torii at Dawn"/></td>
+<td><img src="assets/screenshots/kurosawa-code.jpg" alt="Kurosawa mode: Neovim with neo-tree"/></td>
+<td><img src="assets/screenshots/kurosawa-btop.jpg" alt="Kurosawa mode: btop"/></td>
 </tr>
 <tr>
-<td align="center"><sub>Neovim, fastfetch and btop. <i>Kurosawa</i></sub></td>
-<td align="center"><sub>Neovim with neo-tree. <i>Torii at Dawn</i></sub></td>
+<td align="center"><sub>Neovim with neo-tree, bufferline and lualine</sub></td>
+<td align="center"><sub>btop</sub></td>
 </tr>
 <tr>
-<td><img src="assets/screenshots/kurosawa-dashboard.jpg" alt="Kurosawa mode: the Neovim ensō dashboard on Guiding Wind"/></td>
-<td><img src="assets/screenshots/kurosawa-btop.jpg" alt="Kurosawa mode: btop on Standoff"/></td>
+<td colspan="2" align="center"><img src="assets/screenshots/kurosawa-dashboard.jpg" width="60%" alt="Kurosawa mode: the Neovim ensō dashboard"/></td>
 </tr>
 <tr>
-<td align="center"><sub>The ensō dashboard. <i>Guiding Wind</i></sub></td>
-<td align="center"><sub>btop watching the wallpapers render. <i>Standoff</i></sub></td>
+<td colspan="2" align="center"><sub>The ensō dashboard</sub></td>
 </tr>
 </table>
 
-<sub>All preview renders (terminal captured live, macOS chrome composited), on the black-and-white versions of the original wallpapers.</sub>
+<sub>Terminals captured live in kitty, window chrome composited.</sub>
 
 Switch whenever you like; your original backups are kept, and `./uninstall.sh` works from either variant:
 
@@ -108,26 +95,7 @@ Re-running with the other variant swaps only the theme files it installed. In Ne
 
 ## Wallpapers
 
-The theme on real Ghost of Tsushima wallpapers, the 4K art `scripts/wallpapers.py` downloads from wallhaven:
-
-![Tiled desktop on a red spider lily landscape](assets/screenshots/fan-tiled.jpg)
-<sub>Wallpaper: [wallhaven e7vgml](https://wallhaven.cc/w/e7vgml), uploaded by [HKkkkkkkkk](https://wallhaven.cc/user/HKkkkkkkkk) (no source given)</sub>
-
-![fastfetch on a black-and-white pier](assets/screenshots/fan-fetch.jpg)
-<sub>Wallpaper: [wallhaven rdpd9w](https://wallhaven.cc/w/rdpd9w), uploaded by [Hellsingexe](https://wallhaven.cc/user/Hellsingexe) (no source given)</sub>
-
-![Neovim dashboard on official key art](assets/screenshots/fan-dashboard.jpg)
-<sub>Wallpaper: [wallhaven g72wqd](https://wallhaven.cc/w/g72wqd), official art via [Sucker Punch Productions](https://www.suckerpunch.com/category/game/ghostoftsushima/), uploaded by [Konozettoda](https://wallhaven.cc/user/Konozettoda)</sub>
-
-All rights to this artwork belong to its artists and to Sucker Punch Productions / Sony Interactive Entertainment. It is not part of this repository. If one of these is yours and you would like it credited differently or removed, please open an issue.
-
-### Originals painted from code
-
-![The six original wallpapers](assets/screenshots/wallpapers.jpg)
-
-<p align="center"><sub><i>Higanbana</i> · <i>Torii at Dawn</i> · <i>Standoff</i> · <i>Kurosawa</i> · <i>Guiding Wind</i> · <i>Guiding Wind (paper)</i></sub></p>
-
-The originals are painted by code: ink-wash ridgelines that dissolve into mist, a bristle brush with dry "flying white" strokes, hand-drawn samurai silhouettes, spider lilies with curling petals and stamens, film grain and a vignette. Nothing is bundled as an image. Render the scenes you like at exactly your screen's resolution, or pull official-style 4K art from wallhaven, with one script:
+Six original scenes are painted by code: ink-wash ridgelines that dissolve into mist, a bristle brush with dry "flying white" strokes, hand-drawn samurai silhouettes, spider lilies with curling petals and stamens, film grain and a vignette. Nothing is bundled as an image. Render the scenes you like at exactly your screen's resolution, or pull official-style 4K art from wallhaven, with one script:
 
 ```bash
 python3 scripts/wallpapers.py                 # interactive: pick by number, then set one as your desktop
