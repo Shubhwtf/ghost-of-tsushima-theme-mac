@@ -31,11 +31,12 @@ usage: ./install.sh [options]
 
   --variant V        red (default) or kurosawa, the black-and-white mode; re-run with
                      the other one to switch (your backups are kept)
-  --all              terminals, shell, Neovim and the desktop layer
+  --all              terminals, shell, Neovim, Claude Code and the desktop layer
   --terminal         Terminal.app, iTerm2, Ghostty, kitty, Alacritty, WezTerm,
                      btop, bat, delta, lazygit and fastfetch themes
   --shell            starship prompt, zsh highlighting, fzf and eza colours
   --nvim             the full Neovim config with the ensō dashboard
+  --claude           Claude Code: a custom theme and a status line
   --desktop          SketchyBar, JankyBorders and macOS appearance (dark mode, red
                      accent; graphite with --variant kurosawa)
   --extras           with --desktop: also tidy the Dock and Finder (see macos/defaults.sh)
@@ -53,14 +54,15 @@ examples:
 EOF
 }
 
-DO_TERM=0; DO_SHELL=0; DO_NVIM=0; DO_DESK=0; DO_BREW=0; EXTRAS=0; WALL=""
+DO_TERM=0; DO_SHELL=0; DO_NVIM=0; DO_CLAUDE=0; DO_DESK=0; DO_BREW=0; EXTRAS=0; WALL=""
 [[ $# -eq 0 ]] && { usage; exit 0; }
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --all) DO_TERM=1; DO_SHELL=1; DO_NVIM=1; DO_DESK=1 ;;
+        --all) DO_TERM=1; DO_SHELL=1; DO_NVIM=1; DO_CLAUDE=1; DO_DESK=1 ;;
         --terminal) DO_TERM=1 ;;
         --shell) DO_SHELL=1 ;;
         --nvim) DO_NVIM=1 ;;
+        --claude) DO_CLAUDE=1 ;;
         --desktop) DO_DESK=1 ;;
         --extras) EXTRAS=1 ;;
         --variant) [[ $# -ge 2 ]] || { echo "--variant needs red or kurosawa" >&2; exit 1; }; VARIANT="$2"; shift ;;
@@ -287,6 +289,51 @@ install_nvim() {
     note "open nvim once; lazy.nvim installs the plugins"
 }
 
+# ------------------------------------------------------------------ claude code
+install_claude() {
+    say "Claude Code theme and status line"
+    local cc="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+    put "$SRC/claude/themes/$SLUG.json" "$cc/themes/$SLUG.json"
+    put "$SRC/claude/statusline$SFX.sh" "$cc/ghost-of-tsushima-statusline.sh"
+    chmod +x "$cc/ghost-of-tsushima-statusline.sh"
+    if ! have python3; then
+        note "set \"theme\": \"custom:$SLUG\" in $cc/settings.json, or pick it with /theme"
+        return
+    fi
+    # Only two keys of settings.json change; their old values are kept in $STATE so the
+    # uninstaller can put back exactly those, without touching anything else you changed since.
+    python3 - "$cc/settings.json" "$STATE/claude-settings.json" "$SLUG" "$cc/ghost-of-tsushima-statusline.sh" <<'PY'
+import json, os, sys
+path, record, slug, line = sys.argv[1:5]
+try:
+    with open(path) as f:
+        cfg = json.load(f)
+except FileNotFoundError:
+    cfg = None
+except ValueError:
+    sys.exit(f"  {path} is not valid JSON; left untouched (pick the theme with /theme)")
+data = cfg if isinstance(cfg, dict) else {}
+if not os.path.exists(record):
+    keep = {"existed": cfg is not None}
+    for k in ("theme", "statusLine"):
+        if k in data:
+            keep[k] = data[k]
+    with open(record, "w") as f:
+        json.dump(keep, f, indent=2)
+data["theme"] = "custom:" + slug
+ours = "ghost-of-tsushima-statusline" in json.dumps(data.get("statusLine", ""))
+if "statusLine" not in data or ours:
+    data["statusLine"] = {"type": "command", "command": line}
+else:
+    print("  kept your own Claude Code status line")
+os.makedirs(os.path.dirname(path), exist_ok=True)
+with open(path, "w") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+PY
+    note "Claude Code uses 'custom:$SLUG' (switch any time with /theme)"
+}
+
 # ------------------------------------------------------------------ desktop
 install_desktop() {
     if ! is_mac; then note "skipping SketchyBar, borders and macOS defaults (macOS only)"; return; fi
@@ -340,6 +387,7 @@ printf '\n%s冥人%s  %sGHOST OF TSUSHIMA%s  %s\n\n' "$red" "$off" "$gold" "$off
 [[ $DO_TERM -eq 1 ]] && install_terminal
 [[ $DO_SHELL -eq 1 ]] && install_shell
 [[ $DO_NVIM -eq 1 ]] && install_nvim
+[[ $DO_CLAUDE -eq 1 ]] && install_claude
 [[ $DO_DESK -eq 1 ]] && install_desktop
 [[ -n "$WALL" ]] && install_wallpaper "$WALL"
 

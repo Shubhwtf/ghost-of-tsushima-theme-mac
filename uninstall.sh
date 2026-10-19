@@ -39,6 +39,33 @@ if [[ -f "$MANIFEST" ]]; then
     done < "$MANIFEST"
 fi
 
+# Claude Code: put back the two settings.json keys the installer changed, and nothing else
+if [[ -f "$STATE/claude-settings.json" ]] && command -v python3 >/dev/null 2>&1; then
+    say "Restoring your Claude Code theme and status line"
+    python3 - "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json" "$STATE/claude-settings.json" <<'PY'
+import json, os, sys
+path, record = sys.argv[1:3]
+with open(record) as f:
+    keep = json.load(f)
+try:
+    with open(path) as f:
+        data = json.load(f)
+except (FileNotFoundError, ValueError):
+    sys.exit(0)
+for k in ("theme", "statusLine"):
+    if k in keep:
+        data[k] = keep[k]
+    else:
+        data.pop(k, None)
+if not keep.get("existed") and not data:
+    os.remove(path)
+else:
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+PY
+fi
+
 # every backup holds only your own configs; when one is in several, the oldest copy wins
 if [[ -f "$STATE/backups.txt" ]]; then
     restored="$(mktemp)"
