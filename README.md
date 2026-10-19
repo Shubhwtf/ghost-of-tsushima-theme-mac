@@ -30,6 +30,7 @@ terminals, prompt, editor, menu bar, window borders and six wallpapers painted e
 | **Alacritty, WezTerm** | TOML theme with a ready config, and a complete `wezterm.lua` |
 | **Shell** | A powerline [starship](https://starship.rs) prompt with 冥 and a katana, zsh syntax highlighting and autosuggestion colours, `fzf`, `eza`, `bat` and `less` colours |
 | **Neovim** | `ghost-of-tsushima` colorscheme (treesitter, LSP, telescope, neo-tree, lualine, bufferline, which-key) and a full lazy.nvim config with a half-block ensō dashboard |
+| **Claude Code** | A custom theme for every one of Claude Code's 72 colour keys (lacquer Clawd, gold-leaf prompts, the editor's diff washes) and a starship-style status line, for both variants |
 | **CLI tools** | fastfetch (with the ensō as a truecolor logo), btop, bat (`.tmTheme`), delta, lazygit |
 | **Menu bar** | [SketchyBar](https://github.com/FelixKratz/SketchyBar): an ink bar with a red ensō, spaces numbered 一 二 三 in kanji, the front app, and Wi-Fi, volume, battery and clock in one capsule |
 | **Window borders** | [JankyBorders](https://github.com/FelixKratz/JankyBorders): lacquer red around the focused window, ash for the rest |
@@ -93,6 +94,25 @@ Switch whenever you like; your original backups are kept, and `./uninstall.sh` w
 
 Re-running with the other variant swaps only the theme files it installed. In Neovim you can also flip it per session with `vim.g.got_variant = "kurosawa"` before the colorscheme loads, or `:colorscheme ghost-of-tsushima-kurosawa`. The black-and-white wallpapers come from the same script: `python3 scripts/wallpapers.py --variant kurosawa --originals all`.
 
+## Claude Code
+
+<table>
+<tr>
+<td><img src="assets/screenshots/claude-code.jpg" alt="Claude Code with the Ghost of Tsushima theme"/></td>
+<td><img src="assets/screenshots/kurosawa-claude-code.jpg" alt="Claude Code with the Ghost of Tsushima Kurosawa theme"/></td>
+</tr>
+<tr>
+<td align="center"><sub>Ghost of Tsushima</sub></td>
+<td align="center"><sub>Ghost of Tsushima Kurosawa</sub></td>
+</tr>
+</table>
+
+<sub>Claude Code captured live in kitty with each variant's terminal and Claude Code theme; window chrome composited.</sub>
+
+`./install.sh --claude` (part of `--all`) adds a custom theme to `~/.claude/themes/` and a status line (`冥  model  ~/dir   branch`), and switches Claude Code to them in `~/.claude/settings.json`. The theme shows up in `/theme` as *Ghost of Tsushima* or *Ghost of Tsushima Kurosawa*; after switching variants both are listed. Only the `theme` and `statusLine` keys are changed; their old values are recorded, and `./uninstall.sh` puts back exactly those two keys and leaves everything else in the file as it is. An existing status line of your own is kept.
+
+The red theme sets every colour in exact truecolor; code inside diffs is highlighted with Claude Code's built-in syntax theme. The Kurosawa theme is built on Claude Code's ANSI base, so code is highlighted with your terminal's own gray ANSI ramp and no hue can appear anywhere.
+
 ## Wallpapers
 
 Six original scenes are painted by code: ink-wash ridgelines that dissolve into mist, a bristle brush with dry "flying white" strokes, hand-drawn samurai silhouettes, spider lilies with curling petals and stamens, film grain and a vignette. Nothing is bundled as an image. Render the scenes you like at exactly your screen's resolution, or pull official-style 4K art from wallhaven, with one script:
@@ -127,6 +147,7 @@ Or pick what you want:
 ./install.sh --terminal     # Terminal.app, iTerm2, Ghostty, kitty, Alacritty, WezTerm, btop, bat, delta, lazygit, fastfetch
 ./install.sh --shell        # starship, zsh highlighting + autosuggestions, fzf, eza
 ./install.sh --nvim         # the Neovim config
+./install.sh --claude       # Claude Code theme and status line
 ./install.sh --desktop      # SketchyBar, JankyBorders, dark mode + red accent (add --extras for Dock/Finder)
 ./install.sh --brew         # sketchybar, borders, starship, fastfetch, btop, bat, delta, eza, fzf, lazygit,
                             # neovim, zsh plugins, JetBrains Mono Nerd Font, Ghostty
@@ -232,6 +253,7 @@ python3 src/terminals.py     # Terminal.app, iTerm2, Ghostty, kitty, Alacritty, 
 python3 src/shell.py         # starship, zsh colours, fastfetch and its logo
 python3 src/nvim.py          # Neovim palette and the dashboard ensō
 python3 src/desktop.py       # SketchyBar, JankyBorders, VS Code
+python3 src/claude.py        # Claude Code theme and status line
 python3 src/emblem.py assets # emblem.svg / .png
 python3 src/wallpapers.py --res 3840x2160 --out build/wallpapers   # all six scenes
 python3 src/palette.py       # print the WCAG contrast of every colour and check both variants
@@ -251,9 +273,10 @@ Tested on Linux:
 - every generated file parses: the Terminal.app plist and each colour blob round-trip through `plistlib`, plus TOML, JSON, YAML and the `.tmTheme`
 - both `kitty.conf` files load with kitty's own parser, with no bad lines
 - Neovim 0.12 starts headless with no messages, red and Kurosawa, and its plugins and parsers install
+- Claude Code 2.1 loads both themes (all 72 colour keys, none unknown) and renders them, captured live above
 - the Kurosawa variant has no hue: the file audit above, every Neovim highlight group with all plugins loaded, and every pixel of the live kitty captures (fastfetch, starship, eza, Neovim with neo-tree, btop) is pure gray
 - all shell scripts pass shellcheck
-- install and uninstall round trips in a throwaway home restore every original file: Kurosawa then red, single components then everything, and a home with no configs at all
+- install and uninstall round trips in a throwaway home restore every original file: Kurosawa then red, single components then everything, a home with no configs at all, and a Claude Code `settings.json` that changes between install and uninstall
 
 Written against the documented APIs but not yet run on a real Mac: the SketchyBar items, the Terminal.app import, and the `defaults` keys (including the graphite ones for Kurosawa mode). Issues and fixes are welcome.
 </details>
