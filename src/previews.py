@@ -5,7 +5,8 @@ JankyBorders outlines, and live terminal captures composited in.
 
 usage: [GOT_VARIANT=kurosawa] previews.py CAPS_DIR OUT_DIR [FAN_DIR]
 
-CAPS_DIR  PNG captures: fetch, code, dashboard, btop, plus *_tile versions for the tiled layout
+CAPS_DIR  PNG captures: fetch, code, dashboard, btop, claude (Claude Code), plus *_tile
+          versions for the tiled layout; whichever are present are used
 FAN_DIR   wallhaven downloads (wallhaven-<id>.*) from scripts/wallpapers.py: the theme is
           composited onto real Ghost of Tsushima art (red variant)
 
@@ -197,20 +198,28 @@ def main():
     caps, out = sys.argv[1:3]
     fan = sys.argv[3] if len(sys.argv) > 3 else None
     os.makedirs(out, exist_ok=True)
-    cap = {k: Image.open(os.path.join(caps, f"{k}.png")) for k in ("fetch", "code", "dashboard", "btop")}
+    cap = {k: Image.open(os.path.join(caps, f"{k}.png")) for k in ("fetch", "code", "dashboard", "btop", "claude")
+           if os.path.exists(os.path.join(caps, f"{k}.png"))}
     # tile-sized captures for the tiled layout (fall back to the big ones)
     for k in ("code", "fetch", "btop"):
         p = os.path.join(caps, f"{k}_tile.png")
-        cap[f"{k}_tile"] = Image.open(p) if os.path.exists(p) else cap[k]
+        if os.path.exists(p) or k in cap:
+            cap[f"{k}_tile"] = Image.open(p) if os.path.exists(p) else cap[k]
+    shots = (("fetch", "kitty", "term-fetch"), ("code", "nvim  src/wind.ts", "code"), ("dashboard", "nvim", "dashboard"),
+             ("btop", "btop", "btop"), ("claude", "claude", "claude-code"))
 
-    if KUROSAWA:
+    if "dashboard" in cap:
         cap["dashboard"] = cap["dashboard"].crop((0, 0, cap["dashboard"].width, int(cap["dashboard"].height * 0.78)))
-        for k, title in (("fetch", "kitty"), ("code", "nvim  src/wind.ts"), ("dashboard", "nvim"), ("btop", "btop")):
-            framed(cap[k], title, os.path.join(out, f"kurosawa-{'term-fetch' if k == 'fetch' else k}.jpg"))
+    if KUROSAWA:
+        for k, title, name in shots:
+            if k in cap:
+                framed(cap[k], title, os.path.join(out, f"kurosawa-{name}.jpg"))
         return
 
-    framed(cap["fetch"], "kitty", os.path.join(out, "term-fetch.jpg"))
-    if not (fan and os.path.isdir(fan)):
+    for k, title, name in (shots[0], shots[4]):
+        if k in cap:
+            framed(cap[k], title, os.path.join(out, f"{name}.jpg"))
+    if not (fan and os.path.isdir(fan) and {"fetch", "dashboard", "code_tile"} <= set(cap)):
         return
     files = {f.split("-")[1].split(".")[0]: os.path.join(fan, f) for f in os.listdir(fan) if f.startswith("wallhaven-")}
     fw = 1240
